@@ -1,0 +1,19 @@
+{
+  "name": "junction2016",
+  "version": "0.1.0",
+  "description": "Real-time real-world",
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": "v6.8.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "dependencies": {
+    "express": "^4.14.0",
+    "socket.io": "^1.6.0"
+  }
+}
