@@ -24,6 +24,10 @@
     socket.emit('set calibration', {x: 123});
   });
 
+  $("#fire-missile").on('click', function(e) {
+    socket.emit('fire missile', {direction: 123});
+  });
+
   socket.on('players updated', function(data) {
     console.log('players updated', data);
   });
@@ -35,4 +39,8 @@
   socket.on('game started', function(data) {
     console.log('game started', data);
   });
+
+  socket.on('game state updated', function(data) {
+    console.log('game state updated', data);
+  })
 })();

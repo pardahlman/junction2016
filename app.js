@@ -21,9 +21,10 @@ games = {};
 function getOrCreateGame(gameId) {
   if (!games[gameId]) {
     games[gameId] = {
-      'id': gameId,
-      'players': [],
-      'missiles': []
+      id: gameId,
+      players: [],
+      missiles: [],
+      loopInterval: null,
     }
   }
   return games[gameId];
@@ -34,7 +35,12 @@ function createPlayer(username, socket) {
     username: username,
     socket: socket,
     calibration: null,
+    score: 0,
   };
+}
+
+function createMissile(game, username, direction) {
+
 }
 
 function addPlayer(game, player) {
@@ -68,9 +74,41 @@ function setPlayerCalibration(game, username, calibration) {
   var allCalibrated = _.every(game.players, function(p) { return !!p.calibration })
   if (allCalibrated) {
     sendToAllPlayers(game, 'game started');
+    startGameLoop(game);
   } else {
     console.log('will not start game yet, not all players have calibrated')
   }
+}
+
+function startGameLoop(game) {
+  if (game.loopInterval) throw new Error('There is a loop interval');
+  game.loopInterval = setInterval(function() {
+    console.log('game loop interval');
+
+    // TODO: Move missiles.
+    // TODO: Detect when missiles hit.
+    // TODO: Detect when missiles miss and should be removed.
+
+    publishGameState(game);
+  }, 500);
+}
+
+function publishGameState(game) {
+  var data = {
+    players: _.map(game.players, function(p) {
+      return {
+        username: p.username,
+        score: p.score,
+      };
+    }),
+    missiles: game.missiles,
+  };
+
+  sendToAllPlayers(game, 'game state updated', data);
+}
+
+function fireMissile(game, username, data) {
+
 }
 
 function sendToAllPlayers(game, event, data) {
@@ -99,6 +137,10 @@ io.on('connection', function(socket) {
 
   socket.on('set calibration', function(data) {
     setPlayerCalibration(game, username, data)
+  });
+
+  socket.on('fire missile', function(data) {
+    fireMissile(game, username, data)
   });
 
   socket.on('disconnect', function() {
