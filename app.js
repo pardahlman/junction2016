@@ -33,7 +33,7 @@ function createPlayer(username, socket) {
   return {
     username: username,
     socket: socket,
-    calibrations: {},
+    calibration: null,
   };
 }
 
@@ -54,8 +54,29 @@ function removePlayer(game, username) {
 function publishPlayersUpdated(game) {
   var playerData = _.map(game.players, function(p) { return {username: p.username} });
   console.log('player data', playerData)
+  sendToAllPlayers(game, 'players updated', {players: playerData})
+}
+
+function publishStartCalibration(game) {
+  console.log('will start calibration', game.id)
+  sendToAllPlayers(game, 'start calibration', {})
+}
+
+function setPlayerCalibration(game, username, calibration) {
+  var player = _.find(game.players, function(p) { return p.username == username });
+  player.calibration = calibration;
+  var allCalibrated = _.every(game.players, function(p) { return !!p.calibration })
+  if (allCalibrated) {
+    sendToAllPlayers(game, 'game started');
+  } else {
+    console.log('will not start game yet, not all players have calibrated')
+  }
+}
+
+function sendToAllPlayers(game, event, data) {
+  console.log('sending ['+game.id+']: ' + event, data)
   game.players.forEach(function(p) {
-    p.socket.emit('players updated', {players: playerData});
+    p.socket.emit(event, data);
   });
 }
 
@@ -70,6 +91,14 @@ io.on('connection', function(socket) {
 
     game = getOrCreateGame(data.gameId);
     addPlayer(game, createPlayer(username, socket));
+  });
+
+  socket.on('start game', function(data) {
+    publishStartCalibration(game);
+  })
+
+  socket.on('set calibration', function(data) {
+    setPlayerCalibration(game, username, data)
   });
 
   socket.on('disconnect', function() {
