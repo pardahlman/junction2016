@@ -80,7 +80,7 @@ class PerformCalibration extends React.Component {
   }
 
   componentDidUpdate() {
-    if (Object.keys(this.state.calibrationsByUsername).length >= this.props.players.length)
+    if (Object.keys(this.state.calibrationsByUsername).length >= this.props.players.length - 1)
       this.props.onSendCalibration(this.state.calibrationsByUsername)
   }
 
