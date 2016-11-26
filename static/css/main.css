@@ -1,13 +1,24 @@
-body {
-	background-color: #000;
+* {
+  box-sizing: border-box;
 }
 
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+}
+
+h1 {
+  margin: 0 0 1em;
+}
+
+
 #head-logo {
-	height: auto;
-	width: 200px;
+  height: auto;
+  width: 200px;
 }
 
 #text-logo {
-	height: auto;
-	width: 200px;
+  height: auto;
+  width: 200px;
 }

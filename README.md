@@ -1,4 +1,6 @@
-# XYZ
+# Space Dictators
+
+<img width="300" src="https://cdn.rawgit.com/pardahlman/junction2016/master/static/svg/space-dictators-head-logo.svg"> <img width="200" src="https://cdn.rawgit.com/pardahlman/junction2016/master/static/svg/space-dictators-text-logo.svg">
 
 ## To setup locally
 
