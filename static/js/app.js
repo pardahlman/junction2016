@@ -4,7 +4,7 @@ class JoinGameForm extends React.Component {
     super(props)
 
     this.state = {
-      gameId: '',
+      gameId: 'g1',
       username: ''
     }
   }
@@ -34,13 +34,16 @@ class JoinGameForm extends React.Component {
         <label>Game ID</label>
         <input
           type="text"
+          autoCapitalize="off"
           onChange={this.handleGameIdChange}
           value={this.state.gameId}
           />
 
+        <br/>
         <label>Username</label>
         <input
           type="text"
+          autoCapitalize="off"
           onChange={this.handleUsernameChange}
           value={this.state.username}
           />
@@ -110,17 +113,16 @@ class PerformCalibration extends React.Component {
   }
 }
 
-const Missle = ({ distance, from, to }) =>
-  <div style={{
-    background: 'red',
+const Missle = ({ distance, id, from, to, onClick}) =>
+  <img style={{
     transition: '0.2s all',
     position: 'absolute',
+    transform: 'rotate(180deg)',
     top: distance + '%',
     left: '50%',
-    width: '1em',
-    height: '1em',
-    borderRadius: '100%'
-  }} />
+    width: '3em',
+    height: '3em',
+  }} src="/svg/missile.svg" onClick={() => onClick(id)} />
 
 class HighScore extends React.Component {
   getSortedList(){
@@ -158,16 +160,19 @@ class GameRunning extends React.Component {
     this.props.onMissleFired(this.state.currentOrientationAroundZAxis);
   }
 
+  renderMissile(m) {
+    if (m.to != this.props.username) return null;
+    return <Missle key={m.id} {...m} onClick={this.props.onMissileClicked}/>;
+  }
+
   render() {
+    console.log(this.props)
     return (
       <div style={{ width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'stretch' }}>
         <h1 style={{ padding: '1rem', textAlign: 'center' }}>Running</h1>
         <div style={{ flex: 1, background: '#eee', position: 'relative' }}>
         <HighScore players={this.props.players} style={{float:'right'}} />
-        
-          {this.props.missiles.map(m =>
-            <Missle key={m.id} {...m} />
-          )}
+          {this.props.missiles.map(m => this.renderMissile(m))}
         </div>
         <div style={{ width: '100%', textAlign: 'center', padding: '1em' }}>
           <button onClick={this.onMissileFired}>
@@ -225,6 +230,10 @@ class App extends React.Component {
     this.socket.emit('fire missile', {angle})
   }
 
+  handleMissileClicked = id => {
+    this.socket.emit('remove missile', {id})
+  }
+
   render() {
     switch (this.state.state) {
       case "waiting_for_players":
@@ -238,7 +247,12 @@ class App extends React.Component {
           />
         )
       case "running":
-        return <GameRunning onMissleFired={this.handleMissleFired} players={this.state.players || []} missiles={this.state.missiles || []} />
+        return <GameRunning
+          username={this.state.username}
+	  players={this.state.players || []}
+          onMissleFired={this.handleMissleFired}
+          onMissileClicked={this.handleMissileClicked}
+          missiles={this.state.missiles || []} />
       default:
         return <JoinGameForm onSubmit={this.handleJoinGame} />
     }

@@ -18,9 +18,11 @@ server.listen(port, function(err) {
 games = {};
 var nextMissileId = 1;
 
+var LOOP_INTERVAL = 100;
 var MISSILE_ERROR_MARGINAL_ANGLE = 5;
-var MISSILE_SPEED = 10; // 10% / second
+var MISSILE_SPEED = 20; // 10% / second
 var MISSILE_COOLDOWN = 4000; // milliseconds;
+var SCORE_TO_WIN = 10;
 
 function getNow() {
   return new Date().getTime();
@@ -133,6 +135,9 @@ function startGameLoop(game) {
         missilesToRemove.push(m);
         var player = findPlayer(game, m.from);
         player.score += 1;
+        if (player.score >= SCORE_TO_WIN){
+          finishRound(game);
+        }
       }
     });
 
@@ -150,7 +155,15 @@ function startGameLoop(game) {
     publishGameState(game);
 
     game.prevTime = now;
-  }, 500);
+  }, LOOP_INTERVAL);
+}
+
+function finishRound(game){
+  console.log('Game round is finished');
+  game.state = 'round_finished';
+  if (game.loopInterval) {
+    clearInterval(game.loopInterval);
+  }
 }
 
 function publishGameState(game) {
@@ -290,7 +303,7 @@ io.on('connection', function(socket) {
   socket.on('disconnect', function() {
     console.log('user disconnected');
     var game = getGame(gameId);
-    if (!game) return;
+    if (!game) return console.log('cannot find game', gameId);
 
     removePlayer(game, username)
   });

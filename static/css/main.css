@@ -11,3 +11,14 @@ html, body {
 h1 {
   margin: 0 0 1em;
 }
+
+
+#head-logo {
+  height: auto;
+  width: 200px;
+}
+
+#text-logo {
+  height: auto;
+  width: 200px;
+}
