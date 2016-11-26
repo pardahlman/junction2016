@@ -80,26 +80,41 @@ const Button = function (props) {
   const label = props.label
 
   return (
-    <button onClick={props.onPress}>
+    <button onClick={props.onClick}>
       {label}
     </button>
   )
 }
 
-class WaitingForm extends React.Component {
+let WaitingForm = (props) =>
+  <div>
+    <h1>Waiting</h1>
+    Current players
+       <ul>
+      {props.players.map(p => <li key={p.username}>{p.username}</li>)}
+    </ul>
+    <Button onClick={props.onStartGame} label="Start game!" />
+  </div>
+
+class WaitingForCalibration extends React.Component {
   render() {
     return (
       <div>
-        <h1>Waiting</h1>
-        <p> Current players
-        <ul>
-            {this.props.players.map(p => <li>{p.username}</li>)}
-          </ul>
-        </p>
+        <h1>Waiting for calibration</h1>
+        {this.props.players.map(p => <PlayerCalibration player={p} />)}
       </div>
     )
   }
 }
+
+class PlayerCalibration extends React.Component {
+  render() {
+    return (<div>
+      <Button label={this.props.player.username} />
+    </div>)
+  }
+}
+
 
 class App extends React.Component {
   constructor(props) {
@@ -126,15 +141,21 @@ class App extends React.Component {
     })
   }
 
+  startGame = () => {
+    console.log('start game!');
+    this.socket.emit('start game');
+
+  }
+
   render() {
-    if (this.state.players.length !== 0) {
-      return (
-        <WaitingForm players={this.state.players} />
-      )
+    switch (this.state.state) {
+      case "waiting_for_players":
+        return <WaitingForm players={this.state.players} onStartGame={this.startGame} />
+      case "waiting_for_calibration":
+        return <WaitingForCalibration players={this.state.players} />
+      default:
+        return <JoinGameForm onSubmit={this.handleJoinGame} />
     }
-    return (
-      <JoinGameForm onSubmit={this.handleJoinGame} />
-    )
   }
 }
 
