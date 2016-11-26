@@ -76,27 +76,34 @@ class JoinGameForm extends React.Component {
   }
 }
 
-const Button = function (props) {
-  const label = props.label
-
-  return (
-    <button onClick={props.onClick}>
-      {label}
-    </button>
-  )
-}
-
-let WaitingForm = (props) =>
+let StartGameForm = (props) =>
   <div>
     <h1>Waiting</h1>
     Current players
        <ul>
       {props.players.map(p => <li key={p.username}>{p.username}</li>)}
     </ul>
-    <Button onClick={props.onStartGame} label="Start game!" />
+    <button onClick={props.onStartGame}>Start game!</button>
   </div>
 
-class WaitingForCalibration extends React.Component {
+class PerformCalibration extends React.Component {
+
+  constructor(props) {
+    super(props)
+    this.state = {
+      calibrationsByUsername: {}
+    }
+  }
+
+  onCalibrated(username) {
+    this.setState(state => ({
+      calibrationsByUsername: {
+        ...state.calibrationsByUsername,
+        [username]: 0
+      }
+    }))
+  }
+
   render() {
     console.log(this.props)
     return (
@@ -106,7 +113,7 @@ class WaitingForCalibration extends React.Component {
           if(p.username === this.props.username){
             return <h1>you</h1>
           }
-          return <PlayerCalibration player={p} />})}
+          return <PlayerCalibration player={p} onCalibrated={() => this.onCalibrated(p.username)} />})}
       </div>
     )
   }
@@ -115,7 +122,9 @@ class WaitingForCalibration extends React.Component {
 class PlayerCalibration extends React.Component {
   render() {
     return (<div>
-      <Button label={this.props.player.username} />
+      <button onClick={this.props.onCalibrated} >
+        {this.props.player.username}
+      </button>
     </div>)
   }
 }
@@ -157,9 +166,9 @@ class App extends React.Component {
   render() {
     switch (this.state.state) {
       case "waiting_for_players":
-        return <WaitingForm players={this.state.players} onStartGame={this.startGame} />
+        return <StartGameForm players={this.state.players} onStartGame={this.startGame} />
       case "waiting_for_calibration":
-        return <WaitingForCalibration players={this.state.players} username={this.state.username} />
+        return <PerformCalibration players={this.state.players} username={this.state.username} />
       default:
         return <JoinGameForm onSubmit={this.handleJoinGame} />
     }
