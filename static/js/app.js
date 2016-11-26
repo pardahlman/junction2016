@@ -130,6 +130,11 @@ class PlayerCalibration extends React.Component {
   }
 }
 
+class GameRunning extends React.Component {
+  render(){
+    <h1>Running</h1>
+  }
+}
 
 class App extends React.Component {
   constructor(props) {
@@ -170,6 +175,8 @@ class App extends React.Component {
         return <StartGameForm players={this.state.players} onStartGame={this.startGame} />
       case "waiting_for_calibration":
         return <PerformCalibration players={this.state.players} username={this.state.username} />
+      case "running":
+        return <GameRunning />
       default:
         return <JoinGameForm onSubmit={this.handleJoinGame} />
     }
