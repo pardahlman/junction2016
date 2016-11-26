@@ -18,6 +18,7 @@ server.listen(port, function(err) {
 games = {};
 var nextMissileId = 1;
 
+var LOOP_INTERVAL = 100;
 var MISSILE_ERROR_MARGINAL_ANGLE = 5;
 var MISSILE_SPEED = 10; // 10% / second
 var MISSILE_COOLDOWN = 4000; // milliseconds;
@@ -154,7 +155,7 @@ function startGameLoop(game) {
     publishGameState(game);
 
     game.prevTime = now;
-  }, 500);
+  }, LOOP_INTERVAL);
 }
 
 function finishRound(game){
