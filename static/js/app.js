@@ -61,14 +61,14 @@ class JoinGameForm extends React.Component {
           type="text"
           onChange={this.handleGameIdChange}
           value={this.state.gameId}
-        />
+          />
 
         <label>Username</label>
         <input
           type="text"
           onChange={this.handleUsernameChange}
           value={this.state.username}
-        />
+          />
 
         <button type="submit">Enter game</button>
       </form>
@@ -76,7 +76,7 @@ class JoinGameForm extends React.Component {
   }
 }
 
-const Button = function(props) {
+const Button = function (props) {
   const label = props.label
 
   return (
@@ -86,8 +86,22 @@ const Button = function(props) {
   )
 }
 
-class App extends React.Component {
+class WaitingForm extends React.Component {
+  render() {
+    return (
+      <div>
+        <h1>Waiting</h1>
+        <p> Current players
+        <ul>
+            {this.props.players.map(p => <li>{p.username}</li>)}
+          </ul>
+        </p>
+      </div>
+    )
+  }
+}
 
+class App extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
@@ -113,10 +127,13 @@ class App extends React.Component {
   }
 
   render() {
+    if (this.state.players.length !== 0) {
+      return (
+        <WaitingForm players={this.state.players} />
+      )
+    }
     return (
-      <div>
-        <JoinGameForm onSubmit={this.handleJoinGame} />
-      </div>
+      <JoinGameForm onSubmit={this.handleJoinGame} />
     )
   }
 }
