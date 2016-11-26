@@ -44,6 +44,7 @@ class JoinGameForm extends React.Component {
         <input
           type="text"
           autoCapitalize="off"
+          autoFocus="on"
           onChange={this.handleUsernameChange}
           value={this.state.username}
           />
