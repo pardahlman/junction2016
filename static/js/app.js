@@ -79,11 +79,6 @@ class PerformCalibration extends React.Component {
     window.addEventListener('deviceorientation', this.handleOrientationChange)
   }
 
-  componentDidUpdate() {
-    if (Object.keys(this.state.calibrationsByUsername).length >= this.props.players.length - 1)
-      this.props.onSendCalibration(this.state.calibrationsByUsername)
-  }
-
   componentWillUnmount() {
     window.removeEventListener('deviceorientation', this.handleOrientationChange)
   }
@@ -94,7 +89,10 @@ class PerformCalibration extends React.Component {
         ...state.calibrationsByUsername,
       [username]: state.currentOrientationAroundZAxis
       }
-}))
+    })), () => {
+      if (Object.keys(this.state.calibrationsByUsername).length >= this.props.players.length - 1)
+        this.props.onSendCalibration(this.state.calibrationsByUsername)
+    }
   }
 
 render() {
@@ -127,11 +125,12 @@ class GameRunning extends React.Component {
   }
 
   render() {
-    return (<div>
-      <h1>Running</h1>
-      <button onClick={this.onMissileFired}>
-        fire!
-      </button>
+    return (
+      <div>
+        <h1>Running</h1>
+        <button onClick={this.onMissileFired}>
+          fire!
+        </button>
       </div>
     );
   }
