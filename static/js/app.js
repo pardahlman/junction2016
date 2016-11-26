@@ -113,7 +113,7 @@ class PerformCalibration extends React.Component {
   }
 }
 
-const Missle = ({ distance, from, to }) =>
+const Missle = ({ distance, id, from, to, onClick}) =>
   <div style={{
     background: 'red',
     transition: '0.2s all',
@@ -123,7 +123,7 @@ const Missle = ({ distance, from, to }) =>
     width: '1em',
     height: '1em',
     borderRadius: '100%'
-  }} />
+  }} onClick={() => onClick(id)} />
 
 
 class GameRunning extends React.Component {
@@ -151,9 +151,8 @@ class GameRunning extends React.Component {
   }
 
   renderMissile(m) {
-    console.log(m)
     if (m.to != this.props.username) return null;
-    return <Missle key={m.id} {...m} />;
+    return <Missle key={m.id} {...m} onClick={this.props.onMissileClicked}/>;
   }
 
   render() {
@@ -220,6 +219,10 @@ class App extends React.Component {
     this.socket.emit('fire missile', {angle})
   }
 
+  handleMissileClicked = id => {
+    this.socket.emit('remove missile', {id})
+  }
+
   render() {
     switch (this.state.state) {
       case "waiting_for_players":
@@ -236,6 +239,7 @@ class App extends React.Component {
         return <GameRunning
           username={this.state.username}
           onMissleFired={this.handleMissleFired}
+          onMissileClicked={this.handleMissileClicked}
           missiles={this.state.missiles || []} />
       default:
         return <JoinGameForm onSubmit={this.handleJoinGame} />
