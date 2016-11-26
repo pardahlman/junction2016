@@ -4,7 +4,7 @@ class JoinGameForm extends React.Component {
     super(props)
 
     this.state = {
-      gameId: '',
+      gameId: 'g1',
       username: ''
     }
   }
@@ -34,13 +34,16 @@ class JoinGameForm extends React.Component {
         <label>Game ID</label>
         <input
           type="text"
+          autoCapitalize="off"
           onChange={this.handleGameIdChange}
           value={this.state.gameId}
           />
 
+        <br/>
         <label>Username</label>
         <input
           type="text"
+          autoCapitalize="off"
           onChange={this.handleUsernameChange}
           value={this.state.username}
           />
