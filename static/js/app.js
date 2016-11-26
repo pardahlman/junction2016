@@ -150,14 +150,19 @@ class GameRunning extends React.Component {
     this.props.onMissleFired(this.state.currentOrientationAroundZAxis);
   }
 
+  renderMissile(m) {
+    console.log(m)
+    if (m.to != this.props.username) return null;
+    return <Missle key={m.id} {...m} />;
+  }
+
   render() {
+    console.log(this.props)
     return (
       <div style={{ width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'stretch' }}>
         <h1 style={{ padding: '1rem', textAlign: 'center' }}>Running</h1>
         <div style={{ flex: 1, background: '#eee', position: 'relative' }}>
-          {this.props.missiles.map(m =>
-            <Missle key={m.id} {...m} />
-          )}
+          {this.props.missiles.map(m => this.renderMissile(m))}
         </div>
         <div style={{ width: '100%', textAlign: 'center', padding: '1em' }}>
           <button onClick={this.onMissileFired}>
@@ -228,7 +233,10 @@ class App extends React.Component {
           />
         )
       case "running":
-        return <GameRunning onMissleFired={this.handleMissleFired} missiles={this.state.missiles || []} />
+        return <GameRunning
+          username={this.state.username}
+          onMissleFired={this.handleMissleFired}
+          missiles={this.state.missiles || []} />
       default:
         return <JoinGameForm onSubmit={this.handleJoinGame} />
     }
