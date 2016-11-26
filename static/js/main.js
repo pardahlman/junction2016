@@ -1,8 +1,17 @@
 (function() {
   var socket = io();
 
+  var orientation = {
+    z: null
+  };
+
+  window.addEventListener('deviceorientation', function(e) {
+    orientation.z = e.alpha;
+  });
+
   var gameIdInput = $("#game-id");
   var usernameInput = $("#username");
+
   $("#join-game").on("submit", function(e) {
     e.preventDefault();
 
