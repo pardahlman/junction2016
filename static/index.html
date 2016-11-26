@@ -9,33 +9,17 @@
 
     <link rel="stylesheet" type="text/css" href="/css/main.css"/>
 
-    <script src="/socket.io/socket.io.js"></script>
   </head>
   <body>
-    <h1 id='name'>Hello</h1>
-    <div id="alpha"></div>
-    <div id="beta"></div>
-    <div id="gamma"></div>
-    <input type="button" value="capture" id="captureButton" />
-    <br/>
-    <input type="text" id="debugInput" />
-    <input type="button" value="add" id="addButton" />
-    <input type="button" value="fire!" id="fireButton" />
 
-    <form id="join-game">
-      <input id="game-id" placeholder="Game ID"/>
-      <input id="username" placeholder="Username"/>
-      <input type="submit" value="Join Game"/>
-      <input type="button" id="start-game" value="Start Game"/>
-      <input type="button" id="set-calibration" value="Set Calibration"/>
-      <input type="button" id="fire-missile" value="Fire Missile"/>
-    </form>
-
-    <script
-      src="https://code.jquery.com/jquery-3.1.1.min.js"
-      integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
-      crossorigin="anonymous"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.18.1/babel.min.js" data-presets="es2015,stage-2,react"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.3.1/react.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.3.1/react-dom.js"></script>
     <script src="/js/main.js"></script>
     <script src="/js/detect.js"></script>
+    <script src="/js/app.js" type="text/babel"></script>
+
+    <div id="root" />
   </body>
 </html>
