@@ -89,34 +89,49 @@ class PerformCalibration extends React.Component {
         ...state.calibrationsByUsername,
       [username]: state.currentOrientationAroundZAxis
       }
-    })), () => {
+    }), () => {
       if (Object.keys(this.state.calibrationsByUsername).length >= this.props.players.length - 1)
         this.props.onSendCalibration(this.state.calibrationsByUsername)
-    }
+    })
   }
 
-render() {
-  return (
-    <div>
-      <h1>Waiting for calibration</h1>
+  render() {
+    return (
+      <div>
+        <h1>Waiting for calibration</h1>
 
-      {this.props.players.map(p =>
-        p.username === this.props.username
-          ? <h1>you</h1>
-          : <button onClick={() => this.handleCalibrate(p.username)} disabled={this.state.calibrationsByUsername[p.username]}>{p.username}</button>
-      )}
-    </div>
-  )
+        {this.props.players.map(p =>
+          p.username === this.props.username
+            ? <h1>you</h1>
+            : <button onClick={() => this.handleCalibrate(p.username)} disabled={this.state.calibrationsByUsername[p.username]}>{p.username}</button>
+        )}
+      </div>
+    )
+  }
 }
-}
+
+const Missle = ({ distance, from, to }) =>
+  <div style={{
+    background: 'red',
+    transition: '0.2s all',
+    position: 'absolute',
+    top: distance + '%',
+    left: '50%',
+    width: '1em',
+    height: '1em',
+    borderRadius: '100%'
+  }} />
+
 
 class GameRunning extends React.Component {
 
-  onMissileFired = () => this.props.onMissleFired(this.state.currentOrientationAroundZAxis);
-
-  componentWillUnmount() {
-    window.removeEventListener('deviceorientation', this.handleOrientationChange)
+  constructor(props) {
+    super(props)
+    this.state = {
+      currentOrientationAroundZAxis: 0
+    }
   }
+
   componentDidMount() {
     this.handleOrientationChange = e =>
       this.setState({ currentOrientationAroundZAxis: e.alpha })
@@ -124,13 +139,28 @@ class GameRunning extends React.Component {
     window.addEventListener('deviceorientation', this.handleOrientationChange)
   }
 
+  componentWillUnmount() {
+    window.removeEventListener('deviceorientation', this.handleOrientationChange)
+  }
+
+  onMissileFired = () => {
+    this.props.onMissleFired(this.state.currentOrientationAroundZAxis);
+  }
+
   render() {
     return (
-      <div>
-        <h1>Running</h1>
-        <button onClick={this.onMissileFired}>
-          fire!
-        </button>
+      <div style={{ width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'stretch' }}>
+        <h1 style={{ padding: '1rem', textAlign: 'center' }}>Running</h1>
+        <div style={{ flex: 1, background: '#eee', position: 'relative' }}>
+          {this.props.missiles.map(m =>
+            <Missle key={m.id} {...m} />
+          )}
+        </div>
+        <div style={{ width: '100%', textAlign: 'center', padding: '1em' }}>
+          <button onClick={this.onMissileFired}>
+            Fire!
+          </button>
+        </div>
       </div>
     );
   }
@@ -175,12 +205,10 @@ class App extends React.Component {
       angle: calibrationsByUsername[username]
     }))
 
-    console.log(calibrationsArray)
-
     this.socket.emit('set calibration', calibrationsArray);
   }
 
-  handleOnMissleFired = angle => {
+  handleMissleFired = angle => {
     this.socket.emit('fire missile', {angle})
   }
 
@@ -194,10 +222,10 @@ class App extends React.Component {
             players={this.state.players}
             username={this.state.username}
             onSendCalibration={this.handleSendCalibration}
-            />
+          />
         )
       case "running":
-        return <GameRunning onMissleFired={this.handleOnMissleFired} />
+        return <GameRunning onMissleFired={this.handleMissleFired} missiles={this.state.missiles || []} />
       default:
         return <JoinGameForm onSubmit={this.handleJoinGame} />
     }
