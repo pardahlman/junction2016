@@ -114,16 +114,15 @@ class PerformCalibration extends React.Component {
 }
 
 const Missle = ({ distance, id, from, to, onClick}) =>
-  <div style={{
-    background: 'red',
+  <img style={{
     transition: '0.2s all',
     position: 'absolute',
+    transform: 'rotate(180deg)',
     top: distance + '%',
     left: '50%',
-    width: '1em',
-    height: '1em',
-    borderRadius: '100%'
-  }} onClick={() => onClick(id)} />
+    width: '3em',
+    height: '3em',
+  }} src="/svg/missile.svg" onClick={() => onClick(id)} />
 
 
 class GameRunning extends React.Component {
