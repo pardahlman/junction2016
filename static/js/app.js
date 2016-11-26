@@ -1,4 +1,3 @@
-var socket = io();
 
 $("#start-game").on('click', function(e) {
   socket.emit('start game')
@@ -23,10 +22,6 @@ socket.on('start calibration', function(data) {
 socket.on('game started', function(data) {
   console.log('game started', data);
 });
-
-socket.on('game state updated', function(data) {
-  console.log('game state updated', data);
-})
 
 class JoinGameForm extends React.Component {
 
@@ -91,14 +86,22 @@ const Button = function(props) {
   )
 }
 
-var handleJoinGame = function(player) {
-  socket.emit('join game', {
-    gameId: player.gameId,
-    username: player.username
-  })
-}
-
 class App extends React.Component {
+
+  componentDidMount() {
+    this.socket = io()
+
+    this.socket.on('game state updated', function(data) {
+      console.log('game state updated', data);
+    })
+  }
+
+  handleJoinGame = player => {
+    socket.emit('join game', {
+      gameId: player.gameId,
+      username: player.username
+    })
+  }
 
   render() {
     return (
