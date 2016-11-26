@@ -122,6 +122,17 @@ const Missle = ({ distance, from, to }) =>
     borderRadius: '100%'
   }} />
 
+class HighScore extends React.Component {
+  getSortedList(){
+    return this.props.players.sort((first, second) => second.score-first.score);
+  }
+
+  render(){
+    return (<ol>
+      {this.getSortedList().map(p => <li>{p.username}: {p.score}</li>)}
+    </ol>)
+  }
+}
 
 class GameRunning extends React.Component {
 
@@ -152,6 +163,8 @@ class GameRunning extends React.Component {
       <div style={{ width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'stretch' }}>
         <h1 style={{ padding: '1rem', textAlign: 'center' }}>Running</h1>
         <div style={{ flex: 1, background: '#eee', position: 'relative' }}>
+        <HighScore players={this.props.players} style={{float:'right'}} />
+        
           {this.props.missiles.map(m =>
             <Missle key={m.id} {...m} />
           )}
@@ -225,7 +238,7 @@ class App extends React.Component {
           />
         )
       case "running":
-        return <GameRunning onMissleFired={this.handleMissleFired} missiles={this.state.missiles || []} />
+        return <GameRunning onMissleFired={this.handleMissleFired} players={this.state.players || []} missiles={this.state.missiles || []} />
       default:
         return <JoinGameForm onSubmit={this.handleJoinGame} />
     }
