@@ -83,7 +83,8 @@ let StartGameForm = (props) =>
     <ul>
       {props.players.map(p => <li key={p.username}>{p.username}</li>)}
     </ul>
-    <button onClick={props.onStartGame}>Start game!</button>
+
+    <button onClick={props.onStartGame} disabled={props.players.length === 1}>Start game!</button>
   </div>
 
 class PerformCalibration extends React.Component {
