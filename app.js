@@ -20,7 +20,7 @@ var nextMissileId = 1;
 
 var LOOP_INTERVAL = 100;
 var MISSILE_ERROR_MARGINAL_ANGLE = 5;
-var MISSILE_SPEED = 10; // 10% / second
+var MISSILE_SPEED = 20; // 10% / second
 var MISSILE_COOLDOWN = 4000; // milliseconds;
 var SCORE_TO_WIN = 10;
 
