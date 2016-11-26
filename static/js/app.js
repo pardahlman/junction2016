@@ -88,11 +88,19 @@ const Button = function(props) {
 
 class App extends React.Component {
 
-  componentDidMount() {
-    this.socket = io()
+  constructor(props) {
+    super(props)
+    this.state = {
+      players: []
+    }
+  }
 
-    this.socket.on('game state updated', function(data) {
-      console.log('game state updated', data);
+  componentDidMount() {
+    this.socket = io('85.188.15.153:5000')
+
+    this.socket.on('game state updated', data => {
+      console.log('game state updated', data)
+      this.setState(data)
     })
   }
 
