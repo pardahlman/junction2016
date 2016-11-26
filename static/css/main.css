@@ -14,6 +14,30 @@ html, body {
 h1 {
   margin: 0 0 1em;
 }
+h1.target-lock {
+  color: #000;
+  font-size: 3rem;
+  text-align: center;
+  background: #FF406E;
+  padding: 5px;
+}
+
+
+/* BLINKS */
+.blink {
+  animation: blink-animation 0.15s steps(4, start) 4;
+  -webkit-animation: blink-animation 0.15s steps(4, start) 4;
+}
+@keyframes blink-animation {
+  to {
+    visibility: hidden;
+  }
+}
+@-webkit-keyframes blink-animation {
+  to {
+    visibility: hidden;
+  }
+}
 
 
 /* LOGOS */
