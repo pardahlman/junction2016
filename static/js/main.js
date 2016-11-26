@@ -29,6 +29,10 @@
     socket.emit('start game')
   })
 
+  $("#leave-game").on('click', function(e) {
+    socket.emit('leave game')
+  })
+
   $("#set-calibration").on('click', function(e) {
     socket.emit('set calibration', [{username: 'adam', angle: 90}, {username: 'mackan', angle: 40}]);
   });
