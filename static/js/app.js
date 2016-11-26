@@ -1,27 +1,27 @@
 
-$("#start-game").on('click', function(e) {
-  socket.emit('start game')
-})
+// $("#start-game").on('click', function(e) {
+//   socket.emit('start game')
+// })
+//
+// $("#set-calibration").on('click', function(e) {
+//   socket.emit('set calibration', orientation);
+// });
+//
+// $("#fire-missile").on('click', function(e) {
+//   socket.emit('fire missile', {direction: orientation.z});
+// });
 
-$("#set-calibration").on('click', function(e) {
-  socket.emit('set calibration', orientation);
-});
-
-$("#fire-missile").on('click', function(e) {
-  socket.emit('fire missile', {direction: orientation.z});
-});
-
-socket.on('players updated', function(data) {
-  console.log('players updated', data);
-});
-
-socket.on('start calibration', function(data) {
-  console.log('start calibration', data);
-});
-
-socket.on('game started', function(data) {
-  console.log('game started', data);
-});
+// socket.on('players updated', function(data) {
+//   console.log('players updated', data);
+// });
+//
+// socket.on('start calibration', function(data) {
+//   console.log('start calibration', data);
+// });
+//
+// socket.on('game started', function(data) {
+//   console.log('game started', data);
+// });
 
 class JoinGameForm extends React.Component {
 
@@ -97,7 +97,8 @@ class App extends React.Component {
   }
 
   handleJoinGame = player => {
-    socket.emit('join game', {
+    console.log('join!', player)
+    this.socket.emit('join game', {
       gameId: player.gameId,
       username: player.username
     })
@@ -106,7 +107,7 @@ class App extends React.Component {
   render() {
     return (
       <div>
-        <JoinGameForm onSubmit={handleJoinGame} />
+        <JoinGameForm onSubmit={this.handleJoinGame} />
       </div>
     )
   }
