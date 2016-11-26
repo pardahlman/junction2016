@@ -290,7 +290,7 @@ io.on('connection', function(socket) {
   socket.on('disconnect', function() {
     console.log('user disconnected');
     var game = getGame(gameId);
-    if (!game) return console.log('cannot find game', gameId);
+    if (!game) return;
 
     removePlayer(game, username)
   });
