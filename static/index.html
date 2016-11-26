@@ -23,12 +23,15 @@
     <input type="button" value="fire!" id="fireButton" />
 
     <form id="join-game">
-      <input id="game-id" placeholder="Game ID"/>
-      <input id="username" placeholder="Username"/>
+      <input id="game-id" placeholder="Game ID" autocapitalize="off" />
+      <input id="username" placeholder="Username" autocapitalize="off"/>
       <input type="submit" value="Join Game"/>
       <input type="button" id="start-game" value="Start Game"/>
       <input type="button" id="set-calibration" value="Set Calibration"/>
       <input type="button" id="fire-missile" value="Fire Missile"/>
+
+      <input id="missile-id" placeholder="Missile ID" autocapitalize="off"/>
+      <input type="button" id="remove-missile" value="Remove Missile"/>
     </form>
 
     <script

@@ -30,11 +30,15 @@
   })
 
   $("#set-calibration").on('click', function(e) {
-    socket.emit('set calibration', orientation);
+    socket.emit('set calibration', [{username: 'adam', angle: 90}, {username: 'mackan', angle: 40}]);
   });
 
   $("#fire-missile").on('click', function(e) {
-    socket.emit('fire missile', {direction: orientation.z});
+    socket.emit('fire missile', {angle: orientation.z});
+  });
+
+  $("#remove-missile").on('click', function(e) {
+    socket.emit('remove missile', {id: $("#missile-id").val()});
   });
 
   socket.on('players updated', function(data) {
