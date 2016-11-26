@@ -105,12 +105,13 @@ class PerformCalibration extends React.Component {
         {this.props.players.map(p =>
           p.username === this.props.username
             ? <h1>you</h1>
-            : <button onClick={() => this.handleCalibrate(p.username)}>{p.username}</button>
+            : <button onClick={() => this.handleCalibrate(p.username)} disabled={this.state.calibrationsByUsername[p.username]}>{p.username}</button>
         )}
       </div>
     )
   }
 }
+
 class GameRunning extends React.Component {
   render(){
     <h1>Running</h1>
