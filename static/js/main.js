@@ -30,11 +30,11 @@
   })
 
   $("#set-calibration").on('click', function(e) {
-    socket.emit('set calibration', {x: 123});
+    socket.emit('set calibration', orientation);
   });
 
   $("#fire-missile").on('click', function(e) {
-    socket.emit('fire missile', {direction: 123});
+    socket.emit('fire missile', {direction: orientation.z});
   });
 
   socket.on('players updated', function(data) {
