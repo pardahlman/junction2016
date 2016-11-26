@@ -1,11 +1,14 @@
 * {
   box-sizing: border-box;
+  font-family: 'Bungee', cursive;
 }
 
 html, body {
   margin: 0;
   padding: 0;
   overflow: auto;
+  background-color: #000;
+  font-size: 100%;
 }
 
 h1 {
@@ -13,12 +16,63 @@ h1 {
 }
 
 
-#head-logo {
+/* LOGOS */
+#text-logo {
+  display: block;
   height: auto;
-  width: 200px;
+  margin: 0px auto;
+  margin-bottom: 6rem;
+  padding: 5rem 0 0 0;
+  width: 50%;
 }
 
-#text-logo {
+#head-logo {
+  display: block;
   height: auto;
-  width: 200px;
+  margin: 0px auto;
+  margin-top: 10rem;
+
+  width: 90%;
+  background-color: #000;
+}
+
+#head-logo.bottom {
+  bottom: 0;
+  position: absolute;
+  width: 90%;
+  left: 5%;
+  background-color: #000;
+}
+
+/* FORM INPUTS */
+input, button {
+  border-radius: 10px;
+  color: #4BBFAB;
+  display: block;
+  font-size: 7rem;
+  margin: 2rem auto 0px;
+  padding: 30px;
+  text-transform: uppercase;
+  box-shadow: 0 0px 40px rgba(75, 191, 171, .8);
+}
+
+input {
+  background-color: #000;
+  border: solid 6px #4BBFAB;
+  
+  width: 80%;
+}
+
+button {
+  background: #4BBFAB;
+  border: 0;
+  color: #000;
+  text-shadow: none !important;
+  width: 80%;
+  
+}
+
+button:hover,
+button:active {
+  background: #FF406E;
 }
