@@ -1,28 +1,3 @@
-
-// $("#start-game").on('click', function(e) {
-//   socket.emit('start game')
-// })
-//
-// $("#set-calibration").on('click', function(e) {
-//   socket.emit('set calibration', orientation);
-// });
-//
-// $("#fire-missile").on('click', function(e) {
-//   socket.emit('fire missile', {direction: orientation.z});
-// });
-
-// socket.on('players updated', function(data) {
-//   console.log('players updated', data);
-// });
-//
-// socket.on('start calibration', function(data) {
-//   console.log('start calibration', data);
-// });
-//
-// socket.on('game started', function(data) {
-//   console.log('game started', data);
-// });
-
 class JoinGameForm extends React.Component {
 
   constructor(props) {
@@ -80,10 +55,11 @@ let StartGameForm = (props) =>
   <div>
     <h1>Waiting</h1>
     Current players
-       <ul>
+    <ul>
       {props.players.map(p => <li key={p.username}>{p.username}</li>)}
     </ul>
-    <button onClick={props.onStartGame}>Start game!</button>
+
+    <button onClick={props.onStartGame} disabled={props.players.length === 1}>Start game!</button>
   </div>
 
 class PerformCalibration extends React.Component {
@@ -91,44 +67,74 @@ class PerformCalibration extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      calibrationsByUsername: {}
+      calibrationsByUsername: {},
+      currentOrientationAroundZAxis: 0
     }
   }
 
-  onCalibrated(username) {
+  componentDidMount() {
+    this.handleOrientationChange = e =>
+      this.setState({ currentOrientationAroundZAxis: e.alpha })
+
+    window.addEventListener('deviceorientation', this.handleOrientationChange)
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('deviceorientation', this.handleOrientationChange)
+  }
+
+  handleCalibrate = username => {
     this.setState(state => ({
       calibrationsByUsername: {
         ...state.calibrationsByUsername,
-        [username]: 0
+      [username]: state.currentOrientationAroundZAxis
       }
-    }))
+    })), () => {
+      if (Object.keys(this.state.calibrationsByUsername).length >= this.props.players.length - 1)
+        this.props.onSendCalibration(this.state.calibrationsByUsername)
+    }
+  }
+
+render() {
+  return (
+    <div>
+      <h1>Waiting for calibration</h1>
+
+      {this.props.players.map(p =>
+        p.username === this.props.username
+          ? <h1>you</h1>
+          : <button onClick={() => this.handleCalibrate(p.username)} disabled={this.state.calibrationsByUsername[p.username]}>{p.username}</button>
+      )}
+    </div>
+  )
+}
+}
+
+class GameRunning extends React.Component {
+
+  onMissileFired = () => this.props.onMissleFired(this.state.currentOrientationAroundZAxis);
+
+  componentWillUnmount() {
+    window.removeEventListener('deviceorientation', this.handleOrientationChange)
+  }
+  componentDidMount() {
+    this.handleOrientationChange = e =>
+      this.setState({ currentOrientationAroundZAxis: e.alpha })
+
+    window.addEventListener('deviceorientation', this.handleOrientationChange)
   }
 
   render() {
-    console.log(this.props)
     return (
       <div>
-        <h1>Waiting for calibration</h1>
-        {this.props.players.map(p => {
-          if(p.username === this.props.username){
-            return <h1>you</h1>
-          }
-          return <PlayerCalibration player={p} onCalibrated={() => this.onCalibrated(p.username)} />})}
+        <h1>Running</h1>
+        <button onClick={this.onMissileFired}>
+          fire!
+        </button>
       </div>
-    )
+    );
   }
 }
-
-class PlayerCalibration extends React.Component {
-  render() {
-    return (<div>
-      <button onClick={this.props.onCalibrated} >
-        {this.props.player.username}
-      </button>
-    </div>)
-  }
-}
-
 
 class App extends React.Component {
   constructor(props) {
@@ -149,7 +155,7 @@ class App extends React.Component {
   }
 
   handleJoinGame = player => {
-    this.setState({username : player.username})
+    this.setState({ username: player.username })
     console.log('join!', player)
     this.socket.emit('join game', {
       gameId: player.gameId,
@@ -157,18 +163,41 @@ class App extends React.Component {
     })
   }
 
-  startGame = () => {
-    console.log('start game!');
+  handleStartGame = () => {
     this.socket.emit('start game');
+  }
 
+  handleSendCalibration = calibrationsByUsername => {
+    console.log('start game!');
+
+    const calibrationsArray = Object.keys(calibrationsByUsername).map(username => ({
+      username,
+      angle: calibrationsByUsername[username]
+    }))
+
+    console.log(calibrationsArray)
+
+    this.socket.emit('set calibration', calibrationsArray);
+  }
+
+  handleOnMissleFired = angle => {
+    this.socket.emit('fire missile', {angle})
   }
 
   render() {
     switch (this.state.state) {
       case "waiting_for_players":
-        return <StartGameForm players={this.state.players} onStartGame={this.startGame} />
+        return <StartGameForm players={this.state.players} onStartGame={this.handleStartGame} />
       case "waiting_for_calibration":
-        return <PerformCalibration players={this.state.players} username={this.state.username} />
+        return (
+          <PerformCalibration
+            players={this.state.players}
+            username={this.state.username}
+            onSendCalibration={this.handleSendCalibration}
+            />
+        )
+      case "running":
+        return <GameRunning onMissleFired={this.handleOnMissleFired} />
       default:
         return <JoinGameForm onSubmit={this.handleJoinGame} />
     }

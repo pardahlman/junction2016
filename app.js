@@ -161,6 +161,7 @@ function publishGameState(game) {
       return {
         username: p.username,
         score: p.score,
+        calibration: p.calibration,
         missileCooldown: p.missileCooldown,
       };
     }),
@@ -256,6 +257,7 @@ io.on('connection', function(socket) {
   })
 
   socket.on('set calibration', function(data) {
+    console.log('set calibration', data)
     if (!joined) return;
 
     var game = getGame(gameId);
