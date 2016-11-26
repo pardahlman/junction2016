@@ -98,10 +98,15 @@ let WaitingForm = (props) =>
 
 class WaitingForCalibration extends React.Component {
   render() {
+    console.log(this.props)
     return (
       <div>
         <h1>Waiting for calibration</h1>
-        {this.props.players.map(p => <PlayerCalibration player={p} />)}
+        {this.props.players.map(p => {
+          if(p.username === this.props.username){
+            return <h1>you</h1>
+          }
+          return <PlayerCalibration player={p} />})}
       </div>
     )
   }
@@ -120,7 +125,8 @@ class App extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      players: []
+      players: [],
+      username: ""
     }
   }
 
@@ -134,6 +140,7 @@ class App extends React.Component {
   }
 
   handleJoinGame = player => {
+    this.setState({username : player.username})
     console.log('join!', player)
     this.socket.emit('join game', {
       gameId: player.gameId,
@@ -152,7 +159,7 @@ class App extends React.Component {
       case "waiting_for_players":
         return <WaitingForm players={this.state.players} onStartGame={this.startGame} />
       case "waiting_for_calibration":
-        return <WaitingForCalibration players={this.state.players} />
+        return <WaitingForCalibration players={this.state.players} username={this.state.username} />
       default:
         return <JoinGameForm onSubmit={this.handleJoinGame} />
     }
