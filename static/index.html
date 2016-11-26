@@ -12,7 +12,15 @@
     <script src="/socket.io/socket.io.js"></script>
   </head>
   <body>
-    <h1 id='hello'>Hello</h1>
+    <h1 id='name'>Hello</h1>
+    <div id="alpha"></div>
+    <div id="beta"></div>
+    <div id="gamma"></div>
+    <input type="button" value="capture" id="captureButton" />
+    <br/>
+    <input type="text" id="debugInput" />
+    <input type="button" value="add" id="addButton" />
+    <input type="button" value="fire!" id="fireButton" />
 
     <form id="join-game">
       <input id="game-id" placeholder="Game ID"/>
@@ -28,5 +36,6 @@
       integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
       crossorigin="anonymous"></script>
     <script src="/js/main.js"></script>
+    <script src="/js/detect.js"></script>
   </body>
 </html>
