@@ -163,11 +163,27 @@ class GameRunning extends React.Component {
 
   renderMissile(m) {
     if (m.to != this.props.username) return null;
+    var calibration = _.find(this.props.player.calibration, function(c) { return c.username == m.from });
+    if (!calibration) {
+      console.log('found no calibrated angle', this.props.player, m)
+      return null;
+    }
+
+    var angleDiff = this.angleDistance(this.state.currentOrientationAroundZAxis, calibration.angle)
+    if (angleDiff > 30) {
+      console.log('angle diff too big', angleDiff)
+      return null;
+    }
+
     return <Missle key={m.id} {...m} onClick={this.props.onMissileClicked}/>;
   }
 
+  angleDistance(a, b) {
+    var phi = Math.abs(b - a) % 360; // This is either the distance or 360 - distance
+    return phi > 180 ? 360 - phi : phi;
+  }
+
   render() {
-    console.log(this.props)
     return (
       <div style={{ width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'stretch' }}>
         <h1 style={{ padding: '1rem', textAlign: 'center' }}>Running</h1>
@@ -201,6 +217,11 @@ class App extends React.Component {
       console.log('game state updated', data)
       this.setState(data)
     })
+  }
+
+  currentPlayer() {
+    var username = this.state.username;
+    return _.find(this.state.players, function(p) { return p.username == username})
   }
 
   handleJoinGame = player => {
@@ -250,7 +271,8 @@ class App extends React.Component {
       case "running":
         return <GameRunning
           username={this.state.username}
-	  players={this.state.players || []}
+          players={this.state.players || []}
+          player={this.currentPlayer()}
           onMissleFired={this.handleMissleFired}
           onMissileClicked={this.handleMissileClicked}
           missiles={this.state.missiles || []} />
