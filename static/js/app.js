@@ -141,7 +141,7 @@ class PerformCalibration extends React.Component {
             )}
             style={{
               marginBottom: '1rem',
-              fontSize: '0.8em'.
+              fontSize: '0.8em',
               padding: '1em 1.2em',
               textAlign: 'left'
             }}
@@ -201,7 +201,7 @@ class GameRunning extends React.Component {
     this.props.onMissleFired(this.state.currentOrientationAroundZAxis);
   }
 
-  renderMissile(m) {
+  renderMissile = m => {
     if (m.to != this.props.username) return null;
     var calibration = _.find(this.props.player.calibration, function(c) { return c.username == m.from });
     if (!calibration) {
