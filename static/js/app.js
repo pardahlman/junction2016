@@ -212,7 +212,8 @@ class GameRunning extends React.Component {
     props.onStartListenForMissleEvents(data => {
       console.log('missle', data)
       this.setState({ mostRecentEvent: data.status })
-      setTimeout(() => clearEvent(), 5000)
+      clearEvent()
+      // setTimeout(() => clearEvent(), 5000)
     })
   }
 
@@ -271,23 +272,21 @@ class GameRunning extends React.Component {
   }
 
   render() {
-    console.log(this.state.mostRecentEvent)
     return (
       <HammerComponent onPan={this.onMissileFired}>
         <div style={{ width: '100vw', height: this.state.height || '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'stretch' }}>
           <div>
             <div style={{ display: 'flex', padding: '1rem', color: '#fff', justifyContent: 'space-between' }}>
               <div>
-                {parseInt(this.state.currentOrientationAroundZAxis) || 0}°
+                <div>{parseInt(this.state.currentOrientationAroundZAxis) || 0}°</div>
+                {this.state.mostRecentEvent &&
+                  <div style={{ color: '#ff296b' }}>
+                    {eventMessageByName[this.state.mostRecentEvent]}
+                  </div>
+                }
               </div>
               <HighScore players={this.props.players} />
             </div>
-
-            {this.state.mostRecentEvent &&
-              <div style={{ marginTop: '1em', color: 'red' }}>
-                {eventMessageByName[this.state.mostRecentEvent]}
-              </div>
-            }
           </div>
 
           <div style={{ flex: 1, background: 'black', position: 'relative' }}>
@@ -394,7 +393,7 @@ class App extends React.Component {
           onMissleFired={this.handleMissleFired}
           onMissileClicked={this.handleMissileClicked}
           missiles={this.state.missiles || []}
-          onStartListenForMissleEvents={listener => this.socket.on('missle status', listener)}
+          onStartListenForMissleEvents={listener => this.socket.on('missile status', listener)}
         />
       default:
         return <JoinGameForm onSubmit={this.handleJoinGame} />
