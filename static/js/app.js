@@ -187,14 +187,33 @@ const HighScore = ({ players = [] }) =>
     }
   </ol>
 
+const eventMessageByName = {
+  'target_hit': 'You hit something!',
+  'no_target': 'Miss!',
+  'was_hit': 'You were hit!',
+  'missile_removed': 'Your missle was blocked!'
+}
+
 class GameRunning extends React.Component {
 
   constructor(props) {
     super(props)
     this.state = {
       currentOrientationAroundZAxis: 0,
-      height: null
+      height: null,
+      mostRecentEvent: null
     }
+
+    const clearEvent = _.debounce(
+      () => this.setState({ mostRecentEvent: null }),
+      5000
+    )
+
+    props.onStartListenForMissleEvents(data => {
+      console.log('missle', data)
+      this.setState({ mostRecentEvent: data.status })
+      clearEvent()
+    })
   }
 
   componentDidMount() {
@@ -254,18 +273,22 @@ class GameRunning extends React.Component {
   render() {
     return (
       <HammerComponent onPan={this.onMissileFired}>
-        <div style={{ width: '100vw', height: this.state.height || '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'stretch' }}>
-          <div style={{ display: 'flex', padding: '1rem', color: '#fff', justifyContent: 'space-between' }}>
-            <div>
-              {parseInt(this.state.currentOrientationAroundZAxis) || 0}°
+        <div>
+          <div style={{ width: '100vw', height: this.state.height || '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'stretch' }}>
+            <div style={{ display: 'flex', padding: '1rem', color: '#fff', justifyContent: 'space-between' }}>
+              <div>
+                {parseInt(this.state.currentOrientationAroundZAxis) || 0}°
+              </div>
+              <HighScore players={this.props.players} />
             </div>
-            <HighScore players={this.props.players} />
+            {this.state.mostRecentEvent &&
+              <div style={{ marginTop: '1em', color: 'red' }}>
+                {eventMessageByName[this.state.mostRecentEvent]}
+              </div>
+            }
           </div>
           <div style={{ flex: 1, background: 'black', position: 'relative' }}>
             {this.props.missiles.map(this.renderMissile)}
-          </div>
-
-          <div style={{ width: '100%', textAlign: 'center', padding: '1em' }}>
           </div>
         </div>
       </HammerComponent>
@@ -367,7 +390,9 @@ class App extends React.Component {
           player={this.currentPlayer()}
           onMissleFired={this.handleMissleFired}
           onMissileClicked={this.handleMissileClicked}
-          missiles={this.state.missiles || []} />
+          missiles={this.state.missiles || []}
+          onStartListenForMissleEvents={listener => this.socket.on('missle status', listener)}
+        />
       default:
         return <JoinGameForm onSubmit={this.handleJoinGame} />
     }
