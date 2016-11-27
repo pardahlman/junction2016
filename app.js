@@ -240,6 +240,14 @@ function removeMissile(game, username, data) {
   if (!missile) return log.info('found no missile with id', {gameId: game.id, username, data})
   if (!missile.to == username) return log.warn('missile not meant for user', {gameId: game.id, username, data, missile: missile})
 
+  var fromPlayer = findPlayer(game, missile.from);
+
+  if (fromPlayer) {
+    fromPlayer.socket.emit('missile status', {status: 'missile_removed'});
+  } else {
+    log.warn('could not find missile from player', {username: missile.from})
+  }
+
   game.missiles = _.reject(game.missiles, function(m) { return m.id == data.id })
 }
 
