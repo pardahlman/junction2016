@@ -236,7 +236,7 @@ class GameRunning extends React.Component {
       return;
     }
 
-    var speed = -1 * evt.velocityY * 4;
+    var speed = -1 * evt.velocityY * 8;
     this.props.onMissleFired(this.state.currentOrientationAroundZAxis, speed);
   }
 
@@ -260,9 +260,6 @@ class GameRunning extends React.Component {
           </div>
 
           <div style={{ width: '100%', textAlign: 'center', padding: '1em' }}>
-            <button onClick={this.onMissileFired}>
-              Fire!
-            </button>
           </div>
         </div>
       </HammerComponent>
