@@ -258,6 +258,7 @@ class GameRunning extends React.Component {
     super(props)
     this.state = {
       currentOrientationAroundZAxis: 0,
+      missilePowerUp: 1,
       height: null,
       mostRecentEvent: null
     }
@@ -318,6 +319,11 @@ class GameRunning extends React.Component {
   }
 
   onMissileFired = evt => {
+    if(evt.additionalEvent === "pandown"){
+      let newPowerUp = this.state.missilePowerUp + 5;
+      this.setState({'missilePowerUp' : newPowerUp});
+      return;
+    }
     if(evt.additionalEvent !== "panup"){
       return;
     }
@@ -325,7 +331,9 @@ class GameRunning extends React.Component {
       return;
     }
 
-    var speed = -1 * evt.velocityY * 8;
+    var speed = -1 * evt.velocityY * 8 * this.state.missilePowerUp;
+    // var speed = this.state.missilePowerUp;
+    this.setState({'missilePowerUp' : 1});
     this.props.onMissleFired(this.state.currentOrientationAroundZAxis, speed);
   }
 
