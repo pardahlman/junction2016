@@ -10,6 +10,8 @@ function getQueryVariable(variable) {
   return null;
 }
 
+var MISILE_ANGLE_DIFF_VISIBLE = 30.0;
+
 class JoinGameForm extends React.Component {
 
   constructor(props) {
@@ -173,13 +175,14 @@ class PerformCalibration extends React.Component {
   }
 }
 
-const Missle = ({ id, distance, rotation, ...props }) =>
+const Missle = ({ id, distance, rotation, angleDiff, ...props }) =>
   <img
     src="/svg/missile.svg"
     style={{
       transition: '0.2s all',
       position: 'absolute',
       transform: 'rotate('+ rotation +'deg)',
+      opacity: (1 - angleDiff / MISILE_ANGLE_DIFF_VISIBLE) + '',
       top: distance + '%',
       left: (10 + ((2 * id) % 80)) + '%',
       width: '3em',
@@ -277,23 +280,28 @@ class GameRunning extends React.Component {
   }
 
   renderMissile = m => {
-    if(m.from === this.props.username){
-      return <Missle key={m.id} id={m.id} distance={100-m.distance} rotation={0} />;
+    if (m.from === this.props.username) {
+      var calibration = _.find(this.props.player.calibration, function(c) { return c.username == m.to });
+    } else if (m.to == this.props.username) {
+      var calibration = _.find(this.props.player.calibration, function(c) { return c.username == m.from });
     }
-    if (m.to != this.props.username) return null;
-    var calibration = _.find(this.props.player.calibration, function(c) { return c.username == m.from });
+
     if (!calibration) {
       console.log('found no calibrated angle', this.props.player, m)
       return null;
     }
 
     var angleDiff = this.angleDistance(this.state.currentOrientationAroundZAxis, calibration.angle)
-    if (angleDiff > 30) {
+    if (angleDiff > MISILE_ANGLE_DIFF_VISIBLE) {
       console.log('angle diff too big', angleDiff)
       return null;
     }
 
-    return <Missle key={m.id} {...m} rotation={180} onClick={() => this.props.onMissileClicked(m.id)}/>;
+    if (m.from === this.props.username) {
+      return <Missle key={m.id} id={m.id} distance={100-m.distance} rotation={0} angleDiff={angleDiff}/>;
+    } else if (m.to == this.props.username) {
+      return <Missle key={m.id} {...m} rotation={180} onClick={() => this.props.onMissileClicked(m.id)} angleDiff={angleDiff} />;
+    }
   }
 
   onMissileFired = evt => {
