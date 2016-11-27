@@ -1,3 +1,5 @@
+var RED = '#ff296b'
+
 function getQueryVariable(variable) {
   var query = window.location.search.substring(1);
   var vars = query.split('&');
@@ -74,6 +76,12 @@ class JoinGameForm extends React.Component {
           >
             Enter game
           </button>
+
+          {this.props.clientError ? (
+            <div style={{ margin: '1.4rem 0 0', color: RED }}>
+              ERROR: {this.props.clientError.status} - {this.props.clientError.reason}
+            </div>
+          ): null}
         </div>
       </form>
     )
@@ -83,7 +91,7 @@ class JoinGameForm extends React.Component {
 const StartGameForm = ({
   gameId,
   players = [],
-  onStartGame
+  onStartGame,
 }) =>
   <div style={{ padding: '1em' }}>
     <h1 style={{ textAlign: 'center' }}>
@@ -185,7 +193,7 @@ const Missle = ({ id, distance, rotation, angleDiff, ...props }) =>
       transform: 'rotate('+ rotation +'deg)',
       opacity: (1 - angleDiff / MISILE_ANGLE_DIFF_VISIBLE) + '',
       top: distance + '%',
-      left: (10 + ((2 * id) % 80)) + '%',
+      left: (10 + ((5 * id) % 80)) + '%',
       width: '3em',
       height: '3em',
     }}
@@ -332,7 +340,7 @@ class GameRunning extends React.Component {
               <div>
                 <Target calibrations={this.props.player.calibration}/>
                 {this.state.mostRecentEvent &&
-                  <div style={{ color: '#ff296b' }}>
+                  <div style={{ color: RED }}>
                     {eventMessageByName[this.state.mostRecentEvent]}
                   </div>
                 }
@@ -354,6 +362,7 @@ class App extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
+      clientError: null,
       players: [],
       username: ""
     }
@@ -364,6 +373,7 @@ class App extends React.Component {
 
     this.socket.on('client error', data => {
       console.warn('client error', data)
+      this.setState({clientError: data});
     })
 
     this.socket.on('game state updated', data => {
@@ -393,7 +403,7 @@ class App extends React.Component {
   }
 
   handleJoinGame = player => {
-    this.setState({ username: player.username })
+    this.setState({ username: player.username, clientError: null })
     console.log('join!', player)
     this.socket.emit('join game', {
       gameId: player.gameId,
@@ -429,7 +439,13 @@ class App extends React.Component {
   render() {
     switch (this.state.state) {
       case "waiting_for_players":
-        return <StartGameForm gameId={this.state.id} players={this.state.players} onStartGame={this.handleStartGame} />
+        return (
+          <StartGameForm
+            gameId={this.state.id}
+            players={this.state.players}
+            onStartGame={this.handleStartGame}
+          />
+        )
       case "waiting_for_calibration":
         return (
           <PerformCalibration
@@ -440,18 +456,20 @@ class App extends React.Component {
           />
         )
       case "running":
-        return <GameRunning
-          username={this.state.username}
-          calibrations={this.state.calibrations}
-          players={this.state.players || []}
-          player={this.currentPlayer()}
-          onMissleFired={this.handleMissleFired}
-          onMissileClicked={this.handleMissileClicked}
-          missiles={this.state.missiles || []}
-          onStartListenForMissleEvents={listener => this.socket.on('missile status', listener)}
-        />
+        return (
+          <GameRunning
+            username={this.state.username}
+            calibrations={this.state.calibrations}
+            players={this.state.players || []}
+            player={this.currentPlayer()}
+            onMissleFired={this.handleMissleFired}
+            onMissileClicked={this.handleMissileClicked}
+            missiles={this.state.missiles || []}
+            onStartListenForMissleEvents={listener => this.socket.on('missile status', listener)}
+          />
+        )
       default:
-        return <JoinGameForm onSubmit={this.handleJoinGame} />
+        return <JoinGameForm onSubmit={this.handleJoinGame} clientError={this.state.clientError}/>
     }
   }
 }
