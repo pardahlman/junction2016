@@ -1,10 +1,22 @@
+function getQueryVariable(variable) {
+  var query = window.location.search.substring(1);
+  var vars = query.split('&');
+  for (var i = 0; i < vars.length; i++) {
+      var pair = vars[i].split('=');
+      if (decodeURIComponent(pair[0]) == variable) {
+          return decodeURIComponent(pair[1]);
+      }
+  }
+  return null;
+}
+
 class JoinGameForm extends React.Component {
 
   constructor(props) {
     super(props)
 
     this.state = {
-      gameId: 'g1',
+      gameId: getQueryVariable('game_id') || 'g1',
       username: ''
     }
   }
@@ -338,7 +350,7 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    this.socket = io('85.188.12.35:5000')
+    this.socket = io(getQueryVariable('socket_url'))
 
     this.socket.on('client error', data => {
       console.warn('client error', data)
