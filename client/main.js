@@ -1,3 +1,9 @@
+import socketIO from 'socket.io-client'
+import React from 'react'
+import ReactDOM from 'react-dom'
+import _ from 'lodash'
+import Hammer from 'react-hammerjs'
+
 var RED = '#ff296b'
 
 function getQueryVariable(variable) {
@@ -320,7 +326,7 @@ class GameRunning extends React.Component {
 
   onMissileFired = evt => {
     if(evt.additionalEvent === "pandown"){
-      let newPowerUp = this.state.missilePowerUp + 5;
+      let newPowerUp = this.state.missilePowerUp + 2;
       this.setState({'missilePowerUp' : newPowerUp});
       return;
     }
@@ -331,17 +337,15 @@ class GameRunning extends React.Component {
       return;
     }
 
-    var speed = -1 * evt.velocityY * 8 * this.state.missilePowerUp;
+    var speed = -1 * evt.velocityY * 7 * this.state.missilePowerUp;
     // var speed = this.state.missilePowerUp;
     this.setState({'missilePowerUp' : 1});
     this.props.onMissleFired(this.state.currentOrientationAroundZAxis, speed);
   }
 
-  
-
   render() {
     return (
-      <HammerComponent onPan={this.onMissileFired}>
+      <Hammer onPan={this.onMissileFired}>
         <div style={{ width: '100vw', height: this.state.height || '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'stretch' }}>
           <div>
             <div style={{ display: 'flex', padding: '1rem', color: '#fff', justifyContent: 'space-between' }}>
@@ -362,7 +366,7 @@ class GameRunning extends React.Component {
             {this.props.missiles.map(this.renderMissile)}
           </div>
         </div>
-      </HammerComponent>
+      </Hammer>
     );
   }
 }
@@ -378,7 +382,7 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    this.socket = io(getQueryVariable('socket_url'))
+    this.socket = socketIO(getQueryVariable('socket_url') || 'localhost:5000')
 
     this.socket.on('client error', data => {
       console.warn('client error', data)
