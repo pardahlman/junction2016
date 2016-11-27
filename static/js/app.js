@@ -29,6 +29,11 @@ class JoinGameForm extends React.Component {
   render() {
     return (
       <form onSubmit={this.handleSubmit}>
+        <div style={{width: '100%', textAlign: 'center'}}>
+          <img
+            style={{width: '100%', maxWidth: '300px'}}
+            src="/img/GIT-space-dictator-logo_image.png" />
+        </div>
 
         <div style={{ padding: '1rem' }}>
           <label>Game ID</label>
@@ -301,6 +306,17 @@ class App extends React.Component {
     return _.find(this.state.players, function(p) { return p.username == username})
   }
 
+  requestFullscreen() {
+    try {
+      var root = document.getElementById('root');
+      if (root.requestFullscreen) root.requestFullscreen();
+      if (root.webkitRequestFullscreen) root.webkitRequestFullscreen();
+      if (root.mozRequestFullScreen) root.mozRequestFullScreen();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   handleJoinGame = player => {
     this.setState({ username: player.username })
     console.log('join!', player)
@@ -308,6 +324,7 @@ class App extends React.Component {
       gameId: player.gameId,
       username: player.username
     })
+    // this.requestFullscreen();
   }
 
   handleStartGame = () => {
