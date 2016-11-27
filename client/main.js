@@ -2,6 +2,8 @@ import socketIO from 'socket.io-client'
 import React from 'react'
 import ReactDOM from 'react-dom'
 
+var RED = '#ff296b'
+
 function getQueryVariable(variable) {
   var query = window.location.search.substring(1);
   var vars = query.split('&');
@@ -13,6 +15,8 @@ function getQueryVariable(variable) {
   }
   return null;
 }
+
+var MISILE_ANGLE_DIFF_VISIBLE = 30.0;
 
 class JoinGameForm extends React.Component {
 
@@ -76,6 +80,12 @@ class JoinGameForm extends React.Component {
           >
             Enter game
           </button>
+
+          {this.props.clientError ? (
+            <div style={{ margin: '1.4rem 0 0', color: RED }}>
+              ERROR: {this.props.clientError.status} - {this.props.clientError.reason}
+            </div>
+          ): null}
         </div>
       </form>
     )
@@ -83,12 +93,13 @@ class JoinGameForm extends React.Component {
 }
 
 const StartGameForm = ({
+  gameId,
   players = [],
-  onStartGame
+  onStartGame,
 }) =>
   <div style={{ padding: '1em' }}>
     <h1 style={{ textAlign: 'center' }}>
-      Current players
+      Current players: <span>{gameId}</span>
     </h1>
 
     <ul style={{
@@ -150,7 +161,7 @@ class PerformCalibration extends React.Component {
     return (
       <div style={{ padding: '1em' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <h1>Waiting for calibration</h1>
+          <h1>Waiting for calibration: <span>{this.props.gameId}</span></h1>
           <div>{parseInt(this.state.currentOrientationAroundZAxis) || 0}°</div>
         </div>
 
@@ -177,15 +188,16 @@ class PerformCalibration extends React.Component {
   }
 }
 
-const Missle = ({ id, distance, rotation, ...props }) =>
+const Missle = ({ id, distance, rotation, angleDiff, ...props }) =>
   <img
     src="/svg/missile.svg"
     style={{
       transition: '0.2s all',
       position: 'absolute',
       transform: 'rotate('+ rotation +'deg)',
+      opacity: (1 - angleDiff / MISILE_ANGLE_DIFF_VISIBLE) + '',
       top: distance + '%',
-      left: (10 + ((2 * id) % 80)) + '%',
+      left: (10 + ((5 * id) % 80)) + '%',
       width: '3em',
       height: '3em',
     }}
@@ -215,7 +227,6 @@ class Target extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      calibrations: [],
       angle: 0
     }
   }
@@ -233,12 +244,17 @@ class Target extends React.Component {
   }
 
   render(){
-    var target = this.state.calibrations.filter(c => angleDistance(c.angle, this.state.angle) <= 5)[0];
+    var target = this.props.calibrations.find(c => angleDistance(c.angle, this.state.angle) <= 5);
     if(!target)
-      target = {username: 'Unknown'}
-    return <h1>{target.username}</h1>;
+      return null;
+    return (<h1 className="target-lock blink">{target.username}</h1>);
   }
 }
+
+function angleDistance(a, b) {
+    var phi = Math.abs(b - a) % 360; // This is either the distance or 360 - distance
+    return phi > 180 ? 360 - phi : phi;
+  }
 
 class GameRunning extends React.Component {
 
@@ -246,6 +262,7 @@ class GameRunning extends React.Component {
     super(props)
     this.state = {
       currentOrientationAroundZAxis: 0,
+      missilePowerUp: 1,
       height: null,
       mostRecentEvent: null
     }
@@ -281,26 +298,36 @@ class GameRunning extends React.Component {
   }
 
   renderMissile = m => {
-    if(m.from === this.props.username){
-      return <Missle key={m.id} id={m.id} distance={100-m.distance} rotation={0} />;
+    if (m.from === this.props.username) {
+      var calibration = _.find(this.props.player.calibration, function(c) { return c.username == m.to });
+    } else if (m.to == this.props.username) {
+      var calibration = _.find(this.props.player.calibration, function(c) { return c.username == m.from });
     }
-    if (m.to != this.props.username) return null;
-    var calibration = _.find(this.props.player.calibration, function(c) { return c.username == m.from });
+
     if (!calibration) {
       console.log('found no calibrated angle', this.props.player, m)
       return null;
     }
 
-    var angleDiff = this.angleDistance(this.state.currentOrientationAroundZAxis, calibration.angle)
-    if (angleDiff > 30) {
+    var angleDiff = angleDistance(this.state.currentOrientationAroundZAxis, calibration.angle)
+    if (angleDiff > MISILE_ANGLE_DIFF_VISIBLE) {
       console.log('angle diff too big', angleDiff)
       return null;
     }
 
-    return <Missle key={m.id} {...m} rotation={180} onClick={() => this.props.onMissileClicked(m.id)}/>;
+    if (m.from === this.props.username) {
+      return <Missle key={m.id} id={m.id} distance={100-m.distance} rotation={0} angleDiff={angleDiff}/>;
+    } else if (m.to == this.props.username) {
+      return <Missle key={m.id} {...m} rotation={180} onClick={() => this.props.onMissileClicked(m.id)} angleDiff={angleDiff} />;
+    }
   }
 
   onMissileFired = evt => {
+    if(evt.additionalEvent === "pandown"){
+      let newPowerUp = this.state.missilePowerUp + 2;
+      this.setState({'missilePowerUp' : newPowerUp});
+      return;
+    }
     if(evt.additionalEvent !== "panup"){
       return;
     }
@@ -308,13 +335,10 @@ class GameRunning extends React.Component {
       return;
     }
 
-    var speed = -1 * evt.velocityY * 8;
+    var speed = -1 * evt.velocityY * 7 * this.state.missilePowerUp;
+    // var speed = this.state.missilePowerUp;
+    this.setState({'missilePowerUp' : 1});
     this.props.onMissleFired(this.state.currentOrientationAroundZAxis, speed);
-  }
-
-  angleDistance(a, b) {
-    var phi = Math.abs(b - a) % 360; // This is either the distance or 360 - distance
-    return phi > 180 ? 360 - phi : phi;
   }
 
   render() {
@@ -324,9 +348,9 @@ class GameRunning extends React.Component {
           <div>
             <div style={{ display: 'flex', padding: '1rem', color: '#fff', justifyContent: 'space-between' }}>
               <div>
-                <div>{parseInt(this.state.currentOrientationAroundZAxis) || 0}°</div>
+                <Target calibrations={this.props.player.calibration}/>
                 {this.state.mostRecentEvent &&
-                  <div style={{ color: '#ff296b' }}>
+                  <div style={{ color: RED }}>
                     {eventMessageByName[this.state.mostRecentEvent]}
                   </div>
                 }
@@ -348,6 +372,7 @@ class App extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
+      clientError: null,
       players: [],
       username: ""
     }
@@ -358,6 +383,7 @@ class App extends React.Component {
 
     this.socket.on('client error', data => {
       console.warn('client error', data)
+      this.setState({clientError: data});
     })
 
     this.socket.on('game state updated', data => {
@@ -387,7 +413,7 @@ class App extends React.Component {
   }
 
   handleJoinGame = player => {
-    this.setState({ username: player.username })
+    this.setState({ username: player.username, clientError: null })
     console.log('join!', player)
     this.socket.emit('join game', {
       gameId: player.gameId,
@@ -423,28 +449,37 @@ class App extends React.Component {
   render() {
     switch (this.state.state) {
       case "waiting_for_players":
-        return <StartGameForm players={this.state.players} onStartGame={this.handleStartGame} />
+        return (
+          <StartGameForm
+            gameId={this.state.id}
+            players={this.state.players}
+            onStartGame={this.handleStartGame}
+          />
+        )
       case "waiting_for_calibration":
         return (
           <PerformCalibration
+            gameId={this.state.id}
             players={this.state.players}
             username={this.state.username}
             onSendCalibration={this.handleSendCalibration}
           />
         )
       case "running":
-        return <GameRunning
-          username={this.state.username}
-          calibrations={this.state.calibrations}
-          players={this.state.players || []}
-          player={this.currentPlayer()}
-          onMissleFired={this.handleMissleFired}
-          onMissileClicked={this.handleMissileClicked}
-          missiles={this.state.missiles || []}
-          onStartListenForMissleEvents={listener => this.socket.on('missile status', listener)}
-        />
+        return (
+          <GameRunning
+            username={this.state.username}
+            calibrations={this.state.calibrations}
+            players={this.state.players || []}
+            player={this.currentPlayer()}
+            onMissleFired={this.handleMissleFired}
+            onMissileClicked={this.handleMissileClicked}
+            missiles={this.state.missiles || []}
+            onStartListenForMissleEvents={listener => this.socket.on('missile status', listener)}
+          />
+        )
       default:
-        return <JoinGameForm onSubmit={this.handleJoinGame} />
+        return <JoinGameForm onSubmit={this.handleJoinGame} clientError={this.state.clientError}/>
     }
   }
 }
