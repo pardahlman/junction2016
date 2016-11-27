@@ -13,6 +13,8 @@ html, body {
 
 h1 {
   margin: 0 0 1em;
+  font-size: 1em;
+  font-weight: 400;
 }
 h1.target-lock {
   color: #000;
@@ -22,6 +24,11 @@ h1.target-lock {
   padding: 5px;
 }
 
+ul, li {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
 
 /* BLINKS */
 .blink {
@@ -79,11 +86,11 @@ input, button {
   font-family: inherit;
   font-size: inherit;
   display: block;
+  line-height: 1;
   /*font-size: 2em;*/
   /*margin: 2rem auto 0px;*/
   /*padding: 30px;*/
   /*text-transform: uppercase;*/
-  box-shadow: 0 0 1em rgba(75, 191, 171, .8);
 }
 
 input {
@@ -93,17 +100,21 @@ input {
   width: 100%;
   color: currentColor;
   outline: none;
+  box-shadow: 0 0 1em rgba(75, 191, 171, .8);
 }
 
 button {
   background: #4BBFAB;
+  width: 100%;
+  padding: 0.4em 0.6em;
   border: 0;
   color: #000;
-  width: 80%;
-
+}
+button[disabled] {
+  opacity: 0.6;
 }
 
-button:hover,
+/*button:hover,
 button:active {
   background: #FF406E;
-}
+}*/

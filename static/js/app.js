@@ -42,20 +42,16 @@ class JoinGameForm extends React.Component {
           <br/>
           <label>Username</label>
           <input
+            autoFocus
             type="text"
             autoCapitalize="off"
-            autoFocus
             onChange={this.handleUsernameChange}
             value={this.state.username}
           />
 
           <button
             type="submit"
-            style={{
-              width: '100%',
-              margin: '1.4rem 0 0',
-              padding: '0.4rem'
-            }}
+            style={{ margin: '1.4rem 0 0' }}
           >
             Enter game
           </button>
@@ -65,15 +61,35 @@ class JoinGameForm extends React.Component {
   }
 }
 
-let StartGameForm = (props) =>
-  <div>
-    <h1>Waiting</h1>
-    Current players
-    <ul>
-      {props.players.map(p => <li key={p.username}>{p.username}</li>)}
+const StartGameForm = ({
+  players = [],
+  onStartGame
+}) =>
+  <div style={{ padding: '1em' }}>
+    <h1 style={{ textAlign: 'center' }}>
+      Current players
+    </h1>
+
+    <ul style={{
+      margin: '0 0 1em',
+      border: '1px solid currentColor',
+      padding: '1em',
+      borderRadius: '4px',
+      fontSize: '0.9em'
+    }}>
+      {players.map((p, i) =>
+        <li key={p.username} style={{ marginTop: i === 0 ? 0 : '0.25em' }}>
+          {p.username}
+        </li>
+      )}
     </ul>
 
-    <button onClick={props.onStartGame} disabled={props.players.length === 1}>Start game!</button>
+    <button
+      onClick={onStartGame}
+      disabled={players.length < 2}
+    >
+      Start game
+    </button>
   </div>
 
 class PerformCalibration extends React.Component {
@@ -111,18 +127,22 @@ class PerformCalibration extends React.Component {
 
   render() {
     return (
-      <div>
-        <h1>Waiting for calibration</h1>
+      <div style={{ padding: '1em' }}>
+        <h1 style={{ textAlign: 'center' }}>
+          Waiting for calibration
+        </h1>
 
         {this.props.players.map(p =>
-          p.username === this.props.username
-            ? <h1>you</h1>
-            : <button
-                key={p.username}
-                onClick={() => this.handleCalibrate(p.username)}
-                disabled={this.state.calibrationsByUsername[p.username]}>
-                {p.username}
-              </button>
+          <button
+            onClick={() => this.handleCalibrate(p.username)}
+            disabled={(
+              this.state.calibrationsByUsername[p.username] ||
+              this.props.username === p.username
+            )}
+            style={{ marginBottom: '1rem' }}
+          >
+            Point at "{p.username}" and press me!
+          </button>
         )}
       </div>
     )
@@ -229,7 +249,7 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    this.socket = io()
+    this.socket = io('85.188.12.35:5000')
 
     this.socket.on('game state updated', data => {
       console.log('game state updated', data)
