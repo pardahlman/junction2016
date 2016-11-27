@@ -238,7 +238,7 @@ class GameRunning extends React.Component {
         </div>
 
 
-        <div style={{ flex: 1, background: '#eee', position: 'relative' }}>
+        <div style={{ flex: 1, background: 'black', position: 'relative' }}>
           {this.props.missiles.map(this.renderMissile)}
         </div>
 
