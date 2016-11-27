@@ -140,6 +140,7 @@ class PerformCalibration extends React.Component {
 
         {this.props.players.map(p =>
           <button
+            key={p.username}
             onClick={() => this.handleCalibrate(p.username)}
             disabled={(
               this.state.calibrationsByUsername[p.username] ||
@@ -160,7 +161,7 @@ class PerformCalibration extends React.Component {
   }
 }
 
-const Missle = ({ distance, rotation, ...props }) =>
+const Missle = ({ id, distance, rotation, ...props }) =>
   <img
     src="/svg/missile.svg"
     style={{
@@ -168,7 +169,7 @@ const Missle = ({ distance, rotation, ...props }) =>
       position: 'absolute',
       transform: 'rotate('+ rotation +'deg)',
       top: distance + '%',
-      left: '50%',
+      left: (10 + ((2 * id) % 80)) + '%',
       width: '3em',
       height: '3em',
     }}
@@ -186,6 +187,13 @@ const HighScore = ({ players = [] }) =>
       )
     }
   </ol>
+
+const eventMessageByName = {
+  'target_hit': 'You hit something!',
+  'no_target': 'Miss!',
+  'was_hit': 'You were hit!',
+  'missile_removed': 'Your missle was blocked!'
+}
 
 class Target extends React.Component {
   constructor(props) {
@@ -222,17 +230,28 @@ class GameRunning extends React.Component {
     super(props)
     this.state = {
       currentOrientationAroundZAxis: 0,
-      height: null
+      height: null,
+      mostRecentEvent: null
     }
+
+    const clearEvent = _.debounce(
+      () => this.setState({ mostRecentEvent: null }),
+      5000
+    )
+
+    props.onStartListenForMissleEvents(data => {
+      console.log('missle', data)
+      this.setState({ mostRecentEvent: data.status })
+      clearEvent()
+      // setTimeout(() => clearEvent(), 5000)
+    })
   }
 
   componentDidMount() {
-    this.handleOrientationChange = e =>
-      this.setState({ currentOrientationAroundZAxis: e.alpha })
+    this.handleOrientationChange = e => this.setState({ currentOrientationAroundZAxis: e.alpha })
+    this.handleResize = () => this.setState({ height: window.innerHeight })
 
     window.addEventListener('deviceorientation', this.handleOrientationChange)
-
-    this.handleResize = () => this.setState({ height: window.innerHeight })
     window.addEventListener('resize', this.handleResize)
     window.addEventListener('onorientationchange', this.handleResize)
 
@@ -247,7 +266,7 @@ class GameRunning extends React.Component {
 
   renderMissile = m => {
     if(m.from === this.props.username){
-      return <Missle key={m.id} distance={100-m.distance} rotation={0} />;
+      return <Missle key={m.id} id={m.id} distance={100-m.distance} rotation={0} />;
     }
     if (m.to != this.props.username) return null;
     var calibration = _.find(this.props.player.calibration, function(c) { return c.username == m.from });
@@ -286,17 +305,22 @@ class GameRunning extends React.Component {
     return (
       <HammerComponent onPan={this.onMissileFired}>
         <div style={{ width: '100vw', height: this.state.height || '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'stretch' }}>
-          <div style={{ display: 'flex', padding: '1rem', color: '#fff', justifyContent: 'space-between' }}>
-            <div>
-              {parseInt(this.state.currentOrientationAroundZAxis) || 0}°
+          <div>
+            <div style={{ display: 'flex', padding: '1rem', color: '#fff', justifyContent: 'space-between' }}>
+              <div>
+                <div>{parseInt(this.state.currentOrientationAroundZAxis) || 0}°</div>
+                {this.state.mostRecentEvent &&
+                  <div style={{ color: '#ff296b' }}>
+                    {eventMessageByName[this.state.mostRecentEvent]}
+                  </div>
+                }
+              </div>
+              <HighScore players={this.props.players} />
             </div>
-            <HighScore players={this.props.players} />
-          </div>
-          <div style={{ flex: 1, background: 'black', position: 'relative' }}>
-            {this.props.missiles.map(this.renderMissile)}
           </div>
 
-          <div style={{ width: '100%', textAlign: 'center', padding: '1em' }}>
+          <div style={{ flex: 1, background: 'black', position: 'relative' }}>
+            {this.props.missiles.map(this.renderMissile)}
           </div>
         </div>
         <Target calibrations={this.state.calibrations}/>
@@ -401,7 +425,9 @@ class App extends React.Component {
           player={this.currentPlayer()}
           onMissleFired={this.handleMissleFired}
           onMissileClicked={this.handleMissileClicked}
-          missiles={this.state.missiles || []} />
+          missiles={this.state.missiles || []}
+          onStartListenForMissleEvents={listener => this.socket.on('missile status', listener)}
+        />
       default:
         return <JoinGameForm onSubmit={this.handleJoinGame} />
     }

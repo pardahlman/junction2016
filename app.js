@@ -140,17 +140,25 @@ function startGameLoop(game) {
       if (m.distance >= 100) {
         log.info('missile has hit', m);
         missilesToRemove.push(m);
+
         var fromPlayer = findPlayer(game, m.from);
         var toPlayer = findPlayer(game, m.to);
 
-        fromPlayer.score += 1;
-        log.info('increasing player score', {username: fromPlayer.username, score: fromPlayer.score});
+        if (toPlayer) {
+          toPlayer.socket.emit('missile status', {status: 'was_hit'});
+        } else {
+          log.warn('could not find to player', {username: m.to})
+        }
 
-        fromPlayer.socket.emit('missile status', {status: 'target_hit'});
-        toPlayer.socket.emit('missile status', {status: 'was_hit'});
-
-        if (fromPlayer.score >= SCORE_TO_WIN){
-          finishRound(game);
+        if (fromPlayer) {
+          fromPlayer.score += 1;
+          log.info('increasing player score', {username: fromPlayer.username, score: fromPlayer.score});
+          fromPlayer.socket.emit('missile status', {status: 'target_hit'});
+          if (fromPlayer.score >= SCORE_TO_WIN){
+            finishRound(game);
+          }
+        } else {
+          log.warn('could not find from player', {username: m.from})
         }
       }
     });
