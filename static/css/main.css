@@ -1,14 +1,14 @@
 * {
   box-sizing: border-box;
-  font-family: 'Bungee', cursive;
+  font-family: menlo, monospace;
 }
 
 html, body {
   margin: 0;
   padding: 0;
   overflow: auto;
-  background-color: #000;
-  font-size: 100%;
+  background: #000;
+  color: #4BBFAB;
 }
 
 h1 {
@@ -16,7 +16,7 @@ h1 {
 }
 h1.target-lock {
   color: #000;
-  font-size: 3rem;
+  /*font-size: 3rem;*/
   text-align: center;
   background: #FF406E;
   padding: 5px;
@@ -69,31 +69,38 @@ h1.target-lock {
 }
 
 /* FORM INPUTS */
-input, button {
-  border-radius: 10px;
-  color: #4BBFAB;
+label {
   display: block;
-  font-size: 7rem;
-  margin: 2rem auto 0px;
-  padding: 30px;
-  text-transform: uppercase;
-  box-shadow: 0 0px 40px rgba(75, 191, 171, .8);
+  font-size: 0.9em;
+  margin: 0 0 0.4em;
+}
+input, button {
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: inherit;
+  display: block;
+  /*font-size: 2em;*/
+  /*margin: 2rem auto 0px;*/
+  /*padding: 30px;*/
+  /*text-transform: uppercase;*/
+  box-shadow: 0 0 1em rgba(75, 191, 171, .8);
 }
 
 input {
-  background-color: #000;
-  border: solid 6px #4BBFAB;
-  
-  width: 80%;
+  padding: 0.4em 0.6em;
+  background: none;
+  border: 1px solid currentColor;
+  width: 100%;
+  color: currentColor;
+  outline: none;
 }
 
 button {
   background: #4BBFAB;
   border: 0;
   color: #000;
-  text-shadow: none !important;
   width: 80%;
-  
+
 }
 
 button:hover,

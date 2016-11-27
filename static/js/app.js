@@ -22,34 +22,44 @@ class JoinGameForm extends React.Component {
 
     this.props.onSubmit({
       gameId: this.state.gameId,
-      username: this.state.username,
+      username: this.state.username
     })
   }
 
   render() {
     return (
       <form onSubmit={this.handleSubmit}>
-        <h1>Join game</h1>
 
-        <label>Game ID</label>
-        <input
-          type="text"
-          autoCapitalize="off"
-          onChange={this.handleGameIdChange}
-          value={this.state.gameId}
+        <div style={{ padding: '1rem' }}>
+          <label>Game ID</label>
+          <input
+            type="text"
+            autoCapitalize="off"
+            onChange={this.handleGameIdChange}
+            value={this.state.gameId}
           />
 
-        <br/>
-        <label>Username</label>
-        <input
-          type="text"
-          autoCapitalize="off"
-          autoFocus="on"
-          onChange={this.handleUsernameChange}
-          value={this.state.username}
+          <br/>
+          <label>Username</label>
+          <input
+            type="text"
+            autoCapitalize="off"
+            autoFocus
+            onChange={this.handleUsernameChange}
+            value={this.state.username}
           />
 
-        <button type="submit">Enter game</button>
+          <button
+            type="submit"
+            style={{
+              width: '100%',
+              margin: '1.4rem 0 0',
+              padding: '0.4rem'
+            }}
+          >
+            Enter game
+          </button>
+        </div>
       </form>
     )
   }
