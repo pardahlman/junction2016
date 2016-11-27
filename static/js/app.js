@@ -198,12 +198,10 @@ class GameRunning extends React.Component {
   }
 
   componentDidMount() {
-    this.handleOrientationChange = e =>
-      this.setState({ currentOrientationAroundZAxis: e.alpha })
+    this.handleOrientationChange = e => this.setState({ currentOrientationAroundZAxis: e.alpha })
+    this.handleResize = () => this.setState({ height: window.innerHeight })
 
     window.addEventListener('deviceorientation', this.handleOrientationChange)
-
-    this.handleResize = () => this.setState({ height: window.innerHeight })
     window.addEventListener('resize', this.handleResize)
     window.addEventListener('onorientationchange', this.handleResize)
 
