@@ -155,13 +155,13 @@ class PerformCalibration extends React.Component {
   }
 }
 
-const Missle = ({ distance, ...props }) =>
+const Missle = ({ distance, rotation, ...props }) =>
   <img
     src="/svg/missile.svg"
     style={{
       transition: '0.2s all',
       position: 'absolute',
-      transform: 'rotate(180deg)',
+      transform: 'rotate('+ rotation +'deg)',
       top: distance + '%',
       left: '50%',
       width: '3em',
@@ -212,6 +212,9 @@ class GameRunning extends React.Component {
   }
 
   renderMissile = m => {
+    if(m.from === this.props.username){
+      return <Missle key={m.id} distance={100-m.distance} rotation={0} />;
+    }
     if (m.to != this.props.username) return null;
     var calibration = _.find(this.props.player.calibration, function(c) { return c.username == m.from });
     if (!calibration) {
@@ -225,7 +228,7 @@ class GameRunning extends React.Component {
       return null;
     }
 
-    return <Missle key={m.id} {...m} onClick={() => this.props.onMissileClicked(m.id)}/>;
+    return <Missle key={m.id} {...m} rotation={180} onClick={() => this.props.onMissileClicked(m.id)}/>;
   }
 
   onMissileFired = evt => {
