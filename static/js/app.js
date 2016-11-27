@@ -289,9 +289,17 @@ class App extends React.Component {
   componentDidMount() {
     this.socket = io('85.188.12.35:5000')
 
+    this.socket.on('error', data => {
+      console.warn('error', data)
+    })
+
     this.socket.on('game state updated', data => {
       console.log('game state updated', data)
       this.setState(data)
+    })
+
+    this.socket.on('missile status', data => {
+      console.info('missile status', data)
     })
   }
 
