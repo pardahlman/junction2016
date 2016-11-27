@@ -321,7 +321,7 @@ class App extends React.Component {
       gameId: player.gameId,
       username: player.username
     })
-    this.requestFullscreen();
+    // this.requestFullscreen();
   }
 
   handleStartGame = () => {
