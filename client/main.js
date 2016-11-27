@@ -1,6 +1,8 @@
 import socketIO from 'socket.io-client'
 import React from 'react'
 import ReactDOM from 'react-dom'
+import _ from 'lodash'
+import Hammer from 'react-hammerjs'
 
 var RED = '#ff296b'
 
@@ -343,7 +345,7 @@ class GameRunning extends React.Component {
 
   render() {
     return (
-      <HammerComponent onPan={this.onMissileFired}>
+      <Hammer onPan={this.onMissileFired}>
         <div style={{ width: '100vw', height: this.state.height || '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'stretch' }}>
           <div>
             <div style={{ display: 'flex', padding: '1rem', color: '#fff', justifyContent: 'space-between' }}>
@@ -363,7 +365,7 @@ class GameRunning extends React.Component {
             {this.props.missiles.map(this.renderMissile)}
           </div>
         </div>
-      </HammerComponent>
+      </Hammer>
     );
   }
 }
@@ -379,7 +381,7 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    this.socket = socketIO(getQueryVariable('socket_url'))
+    this.socket = socketIO(getQueryVariable('socket_url') || 'localhost:5000')
 
     this.socket.on('client error', data => {
       console.warn('client error', data)
