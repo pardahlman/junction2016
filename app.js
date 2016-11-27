@@ -282,11 +282,11 @@ io.on('connection', function(socket) {
 
     var game = getOrCreateGame(gameId);
     if (findPlayer(game, username)) {
-      socket.emit('error', {status: 'cannot_join', reason: 'username_taken', gameId: gameId});
+      socket.emit('client error', {status: 'cannot_join', reason: 'username_taken', gameId: gameId});
       return log.warn('player already joined', {gameId, username});
     }
     if (game.state != 'waiting_for_players') {
-      socket.emit('error', {status: 'cannot_join', reason: 'wrong_game_state', gameId: gameId});
+      socket.emit('client error', {status: 'cannot_join', reason: 'wrong_game_state', gameId: gameId});
       return log.warn('player cannot join game, wrong state', {gameId, username, state: game.state});
     }
 
@@ -298,18 +298,18 @@ io.on('connection', function(socket) {
     log.debug('start game', data);
 
     if (!joined) {
-      socket.emit('error', {status: 'cannot_start', reason: 'not_joined'});
+      socket.emit('client error', {status: 'cannot_start', reason: 'not_joined'});
       return;
     };
 
     var game = getGame(gameId);
 
     if (!game) {
-      socket.emit('error', {status: 'cannot_start', reason: 'game_not_found', gameId: gameId});
+      socket.emit('client error', {status: 'cannot_start', reason: 'game_not_found', gameId: gameId});
       return log.info('cannot find game', {gameId});
     }
     if (game.state != 'waiting_for_players') {
-      socket.emit('error', {status: 'cannot_start', reason: 'wrong_game_state', gameId: gameId});
+      socket.emit('client error', {status: 'cannot_start', reason: 'wrong_game_state', gameId: gameId});
       return log.warn('cannot start game, wrong state', {gameId, username, state: game.state})
     }
 
@@ -322,11 +322,11 @@ io.on('connection', function(socket) {
 
     var game = getGame(gameId);
     if (!game) {
-      socket.emit('error', {status: 'cannot_set_calibration', reason: 'game_not_found', gameId: gameId});
+      socket.emit('client error', {status: 'cannot_set_calibration', reason: 'game_not_found', gameId: gameId});
       return log.info('cannot find game', {gameId});
     }
     if (game.state != 'waiting_for_calibration') {
-      socket.emit('error', {status: 'cannot_set_calibration', reason: 'wrong_game_state', gameId: gameId});
+      socket.emit('client error', {status: 'cannot_set_calibration', reason: 'wrong_game_state', gameId: gameId});
       return log.warn('cannot set calibration, wrong state', {gameId, username, state: game.state})
     }
 
@@ -340,11 +340,11 @@ io.on('connection', function(socket) {
 
     var game = getGame(gameId);
     if (!game) {
-      socket.emit('error', {status: 'cannot_fire_missile', reason: 'game_not_found', gameId: gameId});
+      socket.emit('client error', {status: 'cannot_fire_missile', reason: 'game_not_found', gameId: gameId});
       return log.warn('cannot find game', {gameId});
     }
     if (game.state != 'running') {
-      socket.emit('error', {status: 'cannot_fire_missile', reason: 'wrong_game_state', gameId: gameId});
+      socket.emit('client error', {status: 'cannot_fire_missile', reason: 'wrong_game_state', gameId: gameId});
       return log.warn('game is not running', {gameId, state: game.state});
     }
 
@@ -357,11 +357,11 @@ io.on('connection', function(socket) {
 
     var game = getGame(gameId);
     if (!game) {
-      socket.emit('error', {status: 'cannot_remove_missile', reason: 'game_not_found', gameId: gameId});
+      socket.emit('client error', {status: 'cannot_remove_missile', reason: 'game_not_found', gameId: gameId});
       return log.warn('cannot find game', {gameId});
     }
     if (game.state != 'running') {
-      socket.emit('error', {status: 'cannot_remove_missile', reason: 'wrong_game_state', gameId: gameId});
+      socket.emit('client error', {status: 'cannot_remove_missile', reason: 'wrong_game_state', gameId: gameId});
       return log.warn('game is not running', {gameId, state: game.state});
     }
 
