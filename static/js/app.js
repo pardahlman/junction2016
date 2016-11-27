@@ -29,6 +29,11 @@ class JoinGameForm extends React.Component {
   render() {
     return (
       <form onSubmit={this.handleSubmit}>
+        <div style={{width: '100%', textAlign: 'center'}}>
+          <img
+            style={{width: '100%', maxWidth: '300px'}}
+            src="/img/GIT-space-dictator-logo_image.png" />
+        </div>
 
         <div style={{ padding: '1rem' }}>
           <label>Game ID</label>
