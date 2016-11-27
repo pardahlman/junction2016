@@ -186,7 +186,10 @@ class GameRunning extends React.Component {
   render() {
     return (
       <div style={{ width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'stretch' }}>
-        <h1 style={{ padding: '1rem', textAlign: 'center' }}>Running</h1>
+        <h1 style={{ padding: '1rem', textAlign: 'center', color: '#fff' }}>
+          Running
+          <span> - {parseInt(this.state.currentOrientationAroundZAxis) || 0}°</span>
+        </h1>
         <div style={{ flex: 1, background: '#eee', position: 'relative' }}>
         <HighScore players={this.props.players} style={{float:'right'}} />
           {this.props.missiles.map(m => this.renderMissile(m))}
