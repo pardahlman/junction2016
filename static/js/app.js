@@ -154,16 +154,20 @@ class PerformCalibration extends React.Component {
   }
 }
 
-const Missle = ({ distance, id, from, to, onClick}) =>
-  <img style={{
-    transition: '0.2s all',
-    position: 'absolute',
-    transform: 'rotate(180deg)',
-    top: distance + '%',
-    left: '50%',
-    width: '3em',
-    height: '3em',
-  }} src="/svg/missile.svg" onClick={() => onClick(id)} />
+const Missle = ({ distance, ...props }) =>
+  <img
+    src="/svg/missile.svg"
+    style={{
+      transition: '0.2s all',
+      position: 'absolute',
+      transform: 'rotate(180deg)',
+      top: distance + '%',
+      left: '50%',
+      width: '3em',
+      height: '3em',
+    }}
+    {...props}
+  />
 
 const HighScore = ({ players = [] }) =>
   <ol style={{ margin: 0 }}>
@@ -215,7 +219,7 @@ class GameRunning extends React.Component {
       return null;
     }
 
-    return <Missle key={m.id} {...m} onClick={this.props.onMissileClicked}/>;
+    return <Missle key={m.id} {...m} onClick={() => this.props.onMissileClicked(m.id)}/>;
   }
 
   angleDistance(a, b) {
