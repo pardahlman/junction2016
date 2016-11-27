@@ -128,9 +128,10 @@ class PerformCalibration extends React.Component {
   render() {
     return (
       <div style={{ padding: '1em' }}>
-        <h1 style={{ textAlign: 'center' }}>
-          Waiting for calibration
-        </h1>
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <h1>Waiting for calibration</h1>
+          <div>{parseInt(this.state.currentOrientationAroundZAxis) || 0}°</div>
+        </div>
 
         {this.props.players.map(p =>
           <button
