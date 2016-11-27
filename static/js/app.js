@@ -211,7 +211,7 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    this.socket = io('85.188.15.153:5000')
+    this.socket = io()
 
     this.socket.on('game state updated', data => {
       console.log('game state updated', data)
