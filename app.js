@@ -23,8 +23,9 @@ var nextMissileId = 1;
 
 var LOOP_INTERVAL = 100;
 var MISSILE_ERROR_MARGINAL_ANGLE = 5;
-var MISSILE_SPEED = 20; // % / second
-var MISSILE_COOLDOWN = 4000; // milliseconds;
+var MISSILE_COOLDOWN = 4000; // milliseconds.
+var MISSILE_SPEED_MIN = 5; // % / second.
+var MISSILE_SPEED_MAX = 80; // % / second.
 var SCORE_TO_WIN = 10;
 
 function getNow() {
@@ -69,12 +70,17 @@ function createPlayer(username, socket) {
   };
 }
 
-function createMissile(game, from, to) {
+function createMissile(game, from, to, speed) {
+  if (!speed) { speed = 20; } // temp for backwards compatibility.
+  if (speed > MISSILE_SPEED_MAX) { speed = MISSILE_SPEED_MAX; }
+  if (speed < MISSILE_SPEED_MIN) { speed = MISSILE_SPEED_MIN; }
+
   return {
     id: nextMissileId++,
     from: from,
     to: to,
     distance: 0,
+    speed: speed,
   }
 }
 
@@ -130,7 +136,7 @@ function startGameLoop(game) {
     // Move missiles.
     var missilesToRemove = []
     _.each(game.missiles, function(m) {
-      m.distance += (m.speed || MISSILE_SPEED) * (timeDelta / 1000.0)
+      m.distance += m.speed * (timeDelta / 1000.0)
       if (m.distance >= 100) {
         log.info('missile has hit', m);
         missilesToRemove.push(m);
@@ -216,7 +222,7 @@ function fireMissile(game, username, data) {
     return
   }
 
-  var missile = createMissile(game, username, target.username);
+  var missile = createMissile(game, username, target.username, data.speed);
   game.missiles.push(missile);
 }
 
