@@ -323,7 +323,6 @@ class GameRunning extends React.Component {
             {this.props.missiles.map(this.renderMissile)}
           </div>
         </div>
-        <Target calibrations={this.state.calibrations}/>
       </HammerComponent>
     );
   }
