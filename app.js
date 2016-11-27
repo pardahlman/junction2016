@@ -1,6 +1,9 @@
 var http = require('http');
 var express = require('express');
 var _ = require('lodash');
+var bunyan = require('bunyan');
+
+var log = bunyan.createLogger({name: 'app', level: process.env.LOG_LEVEL || 'info'});
 
 var app = express();
 var server = http.createServer(app);
@@ -10,8 +13,8 @@ app.use(express.static('static'));
 
 var port = process.env.PORT || 5000;
 server.listen(port, function(err) {
-  if (err) return console.log(err.stack);
-  console.log('listening on port', port);
+  if (err) return log.error(err.stack);
+  log.info('http server listening', {port});
 });
 
 
@@ -44,7 +47,7 @@ function getOrCreateGame(gameId) {
 }
 
 function destroyGame(gameId) {
-  console.log(`destroying game: ${gameId}`)
+  log.info('destroying game', {gameId});
   game = games[gameId];
   if (game.loopInterval) {
     clearInterval(game.loopInterval);
@@ -85,8 +88,7 @@ function addPlayer(game, player) {
 }
 
 function removePlayer(game, username) {
-  // TODO...
-  console.log('removing player', username, 'from game', game.id)
+  log.info('removing player', {gameId: game.id, username});
   game.players = _.reject(game.players, function(p) {
     return p.username == username;
   })
@@ -98,14 +100,14 @@ function removePlayer(game, username) {
 }
 
 function startGame(game) {
-  console.log('will start game', game.id)
+  log.info('will start game', {gameId: game.id});
   game.state = 'waiting_for_calibration';
   publishGameState(game);
 }
 
 function setPlayerCalibration(game, username, calibration) {
+  log.info('setting calibration for player', {gameId: game.id, username, calibration});
   var player = findPlayer(game, username);
-  console.log(`setting calibration for ${username}:`, calibration)
   player.calibration = calibration;
   var allCalibrated = _.every(game.players, function(p) { return !!p.calibration })
   if (allCalibrated) {
@@ -113,28 +115,29 @@ function setPlayerCalibration(game, username, calibration) {
     sendToAllPlayers(game, 'game started');
     startGameLoop(game);
   } else {
-    console.log('will not start game yet, not all players have calibrated')
+    log.info('will not start game yet, not all players have calibrated', {gameId: game.id});
   }
 }
 
 function startGameLoop(game) {
-  if (game.loopInterval) return console.log('there is a loop interval');
+  if (game.loopInterval) return log.error('there is already a loop interval', {gameId: game.id});
 
   game.prevTime = getNow();
   game.loopInterval = setInterval(function() {
     var now = getNow();
     var timeDelta = now - game.prevTime;
-    console.log('game loop interval');
 
     // Move missiles.
     var missilesToRemove = []
     _.each(game.missiles, function(m) {
       m.distance += MISSILE_SPEED * (timeDelta / 1000.0)
       if (m.distance >= 100) {
-        console.log(`missile has hit ${m.to} from=${m.from}`)
+        log.info('missile has hit', m);
         missilesToRemove.push(m);
         var player = findPlayer(game, m.from);
         player.score += 1;
+        log.info('increasing player score', {username: player.username, score: player.score});
+
         if (player.score >= SCORE_TO_WIN){
           finishRound(game);
         }
@@ -159,7 +162,9 @@ function startGameLoop(game) {
 }
 
 function finishRound(game){
-  console.log('Game round is finished');
+  var playerScores = _.filter(game.players, function(p) { return {username: p.username, score: p.score}});
+  log.info('game round has finished', {gameId: game.id, playerData: playerScores})
+
   game.state = 'round_finished';
   if (game.loopInterval) {
     clearInterval(game.loopInterval);
@@ -185,30 +190,29 @@ function publishGameState(game) {
 }
 
 function fireMissile(game, username, data) {
-  console.log('firing missile', username, data);
+  logData = {gameId: game.id, username, data};
+  log.info('firing missile', logData);
 
   var player = findPlayer(game, username);
   if (player.missileCooldown > 0) {
-    return console.log(`will not fire missile, waiting for cooldown ${player.missileCooldown}`)
+    return log.info('will not fire missile, waiting for cooldown', logData, {missileCooldown: player.missileCooldown});
   }
 
   player.missileCooldown = MISSILE_COOLDOWN;
-  console.log('setting missile cooldown', username, player.missileCooldown);
 
-  console.log(player.calibration)
   var target = _.find(player.calibration, function(c) {
     var d = angleDistance(c.angle, data.angle);
-    console.log('checking distance:', c.angle, d)
     return d <= MISSILE_ERROR_MARGINAL_ANGLE;
   });
 
   if (!target) {
-    console.log('no target for missile', username, data);
+    log.warn('no target for missile', logData)
     return
   }
-  console.log(`found missile target ${target.username}`)
+
+  log.info('found missile target', {target}, logData)
   if (target.username == username) {
-    console.log('dropping missile, cannot target yourself')
+    log.warn('dropping missile, cannot target yourself', logData)
     return
   }
 
@@ -217,17 +221,17 @@ function fireMissile(game, username, data) {
 }
 
 function removeMissile(game, username, data) {
-  console.log('removing missile', username, data);
+  log.info('removing missile', {gameId: game.id, username, data})
 
   var missile = _.find(game.missiles, function(m) { return m.id == data.id });
-  if (!missile) return console.log('found no missile with id', data.id)
-  if (!missile.to == username) return console.log(`missile not meant for ${username}, meant for ${missile.to}`)
+  if (!missile) return log.info('found no missile with id', {gameId: game.id, username, data})
+  if (!missile.to == username) return log.warn('missile not meant for user', {gameId: game.id, username, data, missile: missile})
 
   game.missiles = _.reject(game.missiles, function(m) { return m.id == data.id })
 }
 
 function sendToAllPlayers(game, event, data) {
-  console.log('sending ['+game.id+']: ' + event, data)
+  log.debug('publishing to all players', {gameId: game.id, event, data: JSON.stringify(data)})
   game.players.forEach(function(p) {
     p.socket.emit(event, data);
   });
@@ -239,80 +243,96 @@ function angleDistance(a, b) {
 }
 
 io.on('connection', function(socket) {
-  console.log('user connected');
+  var socketData = {clientIp: socket.request.connection.remoteAddress};
+  log.info('user connected', socketData);
 
   var username, gameId;
   var joined = false;
 
   socket.on('join game', function(data) {
-    console.log('join game', data);
+    log.debug('join game', data);
 
-    if (joined) return console.log('cannot join, already joined', data)
+    if (joined) {
+      return log.warn('user cannot join, already joined', {username, gameId, data});
+    }
 
     username = data.username;
     gameId = data.gameId;
 
     var game = getOrCreateGame(gameId);
-    if (findPlayer(game, username)) return console.log(`player ${username} already exists in ${gameId}`)
-    if (game.state != 'waiting_for_players') return console.log(`${username} cannot join game ${gameId} in state ${game.state}`)
+    if (findPlayer(game, username)) {
+      return log.warn('player already joined', {gameId, username});
+    }
+    if (game.state != 'waiting_for_players') {
+      return log.warn('player cannot join game, wrong state', {gameId, username, state: game.state});
+    }
 
     joined = true;
     addPlayer(game, createPlayer(username, socket));
   });
 
   socket.on('start game', function(data) {
+    log.debug('start game', data);
+
     if (!joined) return;
     var game = getGame(gameId);
-    if (!game) return console.log('cannot find game', gameId);
-    if (game.state != 'waiting_for_players') return console.log(`${username} cannot start game ${gameId} in state ${game.state}`)
+    if (!game) return log.info('cannot find game', {gameId});
+    if (game.state != 'waiting_for_players') {
+      return log.warn('cannot start game, wrong state', {gameId, username, state: game.state})
+    }
 
     startGame(game);
   })
 
   socket.on('set calibration', function(data) {
-    console.log('set calibration', data)
+    log.debug('set calibration', data);
     if (!joined) return;
 
     var game = getGame(gameId);
-    if (!game) return console.log('cannot find game', gameId);
-    if (game.state != 'waiting_for_calibration') return console.log(`${username} cannot set calibration for game ${gameId} in state ${game.state}`)
+    if (!game) return log.info('cannot find game', {gameId});
+    if (game.state != 'waiting_for_calibration') {
+      return log.warn('cannot set calibration, wrong state', {gameId, username, state: game.state})
+    }
 
     setPlayerCalibration(game, username, data)
   });
 
   socket.on('fire missile', function(data) {
+    log.debug('fire missile', data);
+
     if (!joined) return;
 
     var game = getGame(gameId);
-    if (!game) return console.log('cannot find game', gameId);
-    if (game.state != 'running') return console.log(`game ${gameId} is not running, it is ${game.state}`)
+    if (!game) return log.warn('cannot find game', {gameId});
+    if (game.state != 'running') return log.warn('game is not running', {gameId, state: game.state});
 
     fireMissile(game, username, data)
   });
 
   socket.on('remove missile', function(data) {
+    log.debug('remove missile', data);
     if (!joined) return;
 
     var game = getGame(gameId);
-    if (!game) return console.log('cannot find game', gameId);
-    if (game.state != 'running') return console.log(`game ${gameId} is not running, it is ${game.state}`)
+    if (!game) return log.warn('cannot find game', {gameId});
+    if (game.state != 'running') return log.warn('game is not running', {gameId, state: game.state});
 
     removeMissile(game, username, data)
   })
 
   socket.on('disconnect', function() {
-    console.log('user disconnected');
+    log.warn('user disconnected', {socketData});
     var game = getGame(gameId);
-    if (!game) return console.log('cannot find game', gameId);
+    if (!game) return log.info('cannot find game', {gameId});
 
     removePlayer(game, username)
   });
 
   socket.on('leave game', function() {
-    console.log('user left');
-    if (!joined) return console.log('cannot leave, have not joined');
+    log.warn('leave game', {joined, gameId, username, socketData});
+    if (!joined) return log.warn('cannot leave, have not joined');
     var game = getGame(gameId);
-    if (!game) return console.log('cannot find game', gameId);
+    if (!game) return log.info('cannot find game', {gameId});
 
     removePlayer(game, username)
     username = null;
