@@ -187,7 +187,8 @@ class GameRunning extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      currentOrientationAroundZAxis: 0
+      currentOrientationAroundZAxis: 0,
+      height: null
     }
   }
 
@@ -196,10 +197,18 @@ class GameRunning extends React.Component {
       this.setState({ currentOrientationAroundZAxis: e.alpha })
 
     window.addEventListener('deviceorientation', this.handleOrientationChange)
+
+    this.handleResize = () => this.setState({ height: window.innerHeight })
+    window.addEventListener('resize', this.handleResize)
+    window.addEventListener('onorientationchange', this.handleResize)
+
+    this.handleResize()
   }
 
   componentWillUnmount() {
     window.removeEventListener('deviceorientation', this.handleOrientationChange)
+    window.removeEventListener('resize', this.handleResize)
+    window.removeEventListener('onorientationchange', this.handleResize)
   }
 
   onMissileFired = () => {
@@ -230,7 +239,7 @@ class GameRunning extends React.Component {
 
   render() {
     return (
-      <div style={{ width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'stretch' }}>
+      <div style={{ width: '100vw', height: this.state.height || '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'stretch' }}>
         <div style={{ display: 'flex', padding: '1rem', color: '#fff', justifyContent: 'space-between' }}>
           <div>
             {parseInt(this.state.currentOrientationAroundZAxis) || 0}°
