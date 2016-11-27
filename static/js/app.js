@@ -31,7 +31,7 @@ class JoinGameForm extends React.Component {
       <form onSubmit={this.handleSubmit}>
         <div style={{width: '100%', textAlign: 'center'}}>
           <img
-            style={{width: '100%', maxWidth: '300px'}}
+            style={{maxHeight: '40vh'}}
             src="/img/GIT-space-dictator-logo_image.png" />
         </div>
 
