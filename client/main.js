@@ -1,3 +1,7 @@
+import socketIO from 'socket.io-client'
+import React from 'react'
+import ReactDOM from 'react-dom'
+
 function getQueryVariable(variable) {
   var query = window.location.search.substring(1);
   var vars = query.split('&');
@@ -350,7 +354,7 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    this.socket = io(getQueryVariable('socket_url'))
+    this.socket = socketIO(getQueryVariable('socket_url'))
 
     this.socket.on('client error', data => {
       console.warn('client error', data)
