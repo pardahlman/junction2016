@@ -322,6 +322,8 @@ io.on('connection', function(socket) {
 
   socket.on('disconnect', function() {
     log.warn('user disconnected', {socketData});
+
+    if (!joined) return;
     var game = getGame(gameId);
     if (!game) return log.info('cannot find game', {gameId});
 
