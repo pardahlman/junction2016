@@ -6,7 +6,10 @@
 html, body {
   margin: 0;
   padding: 0;
-  overflow: auto;
+  overflow: hidden;
+  position: fixed;
+  height: 100%;
+  width: 100%;
   background: #000;
   color: #4BBFAB;
 }
@@ -106,7 +109,7 @@ input {
 button {
   background: #4BBFAB;
   width: 100%;
-  padding: 0.4em 0.6em;
+  padding: 0.5em 0.6em;
   border: 0;
   color: #000;
 }

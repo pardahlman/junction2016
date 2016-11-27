@@ -6,7 +6,7 @@
   "author": "",
   "license": "MIT",
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js | bunyan"
   },
   "engines": {
     "node": "v6.8.1"
@@ -16,6 +16,7 @@
     "url": ""
   },
   "dependencies": {
+    "bunyan": "^1.8.5",
     "express": "^4.14.0",
     "lodash": "^4.17.2",
     "socket.io": "^1.6.0"
