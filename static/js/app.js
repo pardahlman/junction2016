@@ -37,9 +37,9 @@ class JoinGameForm extends React.Component {
             autoCapitalize="off"
             onChange={this.handleGameIdChange}
             value={this.state.gameId}
-          />
+            />
 
-          <br/>
+          <br />
           <label>Username</label>
           <input
             autoFocus
@@ -47,12 +47,12 @@ class JoinGameForm extends React.Component {
             autoCapitalize="off"
             onChange={this.handleUsernameChange}
             value={this.state.username}
-          />
+            />
 
           <button
             type="submit"
             style={{ margin: '1.4rem 0 0' }}
-          >
+            >
             Enter game
           </button>
         </div>
@@ -87,7 +87,7 @@ const StartGameForm = ({
     <button
       onClick={onStartGame}
       disabled={players.length < 2}
-    >
+      >
       Start game
     </button>
   </div>
@@ -119,34 +119,34 @@ class PerformCalibration extends React.Component {
         ...state.calibrationsByUsername,
       [username]: state.currentOrientationAroundZAxis
       }
-    }), () => {
-      if (Object.keys(this.state.calibrationsByUsername).length >= this.props.players.length - 1)
-        this.props.onSendCalibration(this.state.calibrationsByUsername)
-    })
+}), () => {
+  if (Object.keys(this.state.calibrationsByUsername).length >= this.props.players.length - 1)
+    this.props.onSendCalibration(this.state.calibrationsByUsername)
+})
   }
 
-  render() {
-    return (
-      <div style={{ padding: '1em' }}>
-        <h1 style={{ textAlign: 'center' }}>
-          Waiting for calibration
+render() {
+  return (
+    <div style={{ padding: '1em' }}>
+      <h1 style={{ textAlign: 'center' }}>
+        Waiting for calibration
         </h1>
 
-        {this.props.players.map(p =>
-          <button
-            onClick={() => this.handleCalibrate(p.username)}
-            disabled={(
-              this.state.calibrationsByUsername[p.username] ||
-              this.props.username === p.username
-            )}
-            style={{ marginBottom: '1rem' }}
+      {this.props.players.map(p =>
+        <button
+          onClick={() => this.handleCalibrate(p.username)}
+          disabled={(
+            this.state.calibrationsByUsername[p.username] ||
+            this.props.username === p.username
+          )}
+          style={{ marginBottom: '1rem' }}
           >
-            Point at "{p.username}" and press me!
+          Point at "{p.username}" and press me!
           </button>
-        )}
-      </div>
-    )
-  }
+      )}
+    </div>
+  )
+}
 }
 
 const Missle = ({ distance, id, from, to, onClick}) =>
@@ -161,11 +161,11 @@ const Missle = ({ distance, id, from, to, onClick}) =>
   }} src="/svg/missile.svg" onClick={() => onClick(id)} />
 
 class HighScore extends React.Component {
-  getSortedList(){
-    return this.props.players.sort((first, second) => second.score-first.score);
+  getSortedList() {
+    return this.props.players.sort((first, second) => second.score - first.score);
   }
 
-  render(){
+  render() {
     return (<ol>
       {this.getSortedList().map(p => <li>{p.username}: {p.score}</li>)}
     </ol>)
@@ -177,7 +177,7 @@ class GameRunning extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      currentOrientationAroundZAxis: 0
+      currentOrientationAroundZAxis: 0,
     }
   }
 
@@ -192,13 +192,13 @@ class GameRunning extends React.Component {
     window.removeEventListener('deviceorientation', this.handleOrientationChange)
   }
 
-  onMissileFired = () => {
-    this.props.onMissleFired(this.state.currentOrientationAroundZAxis);
+  onMissileFired = speed => {
+    this.props.onMissleFired(this.state.currentOrientationAroundZAxis, speed);
   }
 
   renderMissile(m) {
     if (m.to != this.props.username) return null;
-    var calibration = _.find(this.props.player.calibration, function(c) { return c.username == m.from });
+    var calibration = _.find(this.props.player.calibration, function (c) { return c.username == m.from });
     if (!calibration) {
       console.log('found no calibrated angle', this.props.player, m)
       return null;
@@ -206,11 +206,25 @@ class GameRunning extends React.Component {
 
     var angleDiff = this.angleDistance(this.state.currentOrientationAroundZAxis, calibration.angle)
     if (angleDiff > 30) {
+      
       console.log('angle diff too big', angleDiff)
       return null;
     }
 
-    return <Missle key={m.id} {...m} onClick={this.props.onMissileClicked}/>;
+    return <Missle key={m.id} {...m} onClick={this.props.onMissileClicked} />;
+  }
+
+  handlePan = evt => {
+    if(evt.additionalEvent !== "panup"){
+      return;
+    }
+    if(evt.velocityY > 0){
+      return;
+    }
+
+    var speed = -1 * evt.velocityY * 4;
+    this.onMissileFired(speed);
+    evt.distance
   }
 
   angleDistance(a, b) {
@@ -220,21 +234,23 @@ class GameRunning extends React.Component {
 
   render() {
     return (
-      <div style={{ width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'stretch' }}>
-        <h1 style={{ padding: '1rem', textAlign: 'center', color: '#fff' }}>
-          Running
+      <HammerComponent onPan={this.handlePan}>
+        <div style={{ width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'stretch' }}>
+          <h1 style={{ padding: '1rem', textAlign: 'center', color: '#fff' }}>
+            Running
           <span> - {parseInt(this.state.currentOrientationAroundZAxis) || 0}°</span>
-        </h1>
-        <div style={{ flex: 1, background: '#eee', position: 'relative' }}>
-        <HighScore players={this.props.players} style={{float:'right'}} />
-          {this.props.missiles.map(m => this.renderMissile(m))}
-        </div>
-        <div style={{ width: '100%', textAlign: 'center', padding: '1em' }}>
-          <button onClick={this.onMissileFired}>
-            Fire!
+          </h1>
+          <div style={{ flex: 1, background: '#eee', position: 'relative' }}>
+            <HighScore players={this.props.players} style={{ float: 'right' }} />
+            {this.props.missiles.map(m => this.renderMissile(m))}
+          </div>
+          <div style={{ width: '100%', textAlign: 'center', padding: '1em' }}>
+            <button onClick={this.onMissileFired}>
+              Fire!
           </button>
+          </div>
         </div>
-      </div>
+      </HammerComponent>
     );
   }
 }
@@ -259,7 +275,7 @@ class App extends React.Component {
 
   currentPlayer() {
     var username = this.state.username;
-    return _.find(this.state.players, function(p) { return p.username == username})
+    return _.find(this.state.players, function (p) { return p.username == username })
   }
 
   handleJoinGame = player => {
@@ -286,12 +302,12 @@ class App extends React.Component {
     this.socket.emit('set calibration', calibrationsArray);
   }
 
-  handleMissleFired = angle => {
-    this.socket.emit('fire missile', {angle})
+  handleMissleFired = (angle, speed) => {
+    this.socket.emit('fire missile', { angle, speed })
   }
 
   handleMissileClicked = id => {
-    this.socket.emit('remove missile', {id})
+    this.socket.emit('remove missile', { id })
   }
 
   render() {
@@ -304,7 +320,7 @@ class App extends React.Component {
             players={this.state.players}
             username={this.state.username}
             onSendCalibration={this.handleSendCalibration}
-          />
+            />
         )
       case "running":
         return <GameRunning
