@@ -199,7 +199,6 @@ class Target extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      calibrations: [],
       angle: 0
     }
   }
@@ -217,12 +216,17 @@ class Target extends React.Component {
   }
 
   render(){
-    var target = this.state.calibrations.filter(c => angleDistance(c.angle, this.state.angle) <= 5)[0];
+    var target = this.props.calibrations.find(c => angleDistance(c.angle, this.state.angle) <= 5);
     if(!target)
-      target = {username: 'Unknown'}
-    return <h1>{target.username}</h1>;
+      return null;
+    return (<h1 className="target-lock blink">{target.username}</h1>);
   }
 }
+
+function angleDistance(a, b) {
+    var phi = Math.abs(b - a) % 360; // This is either the distance or 360 - distance
+    return phi > 180 ? 360 - phi : phi;
+  }
 
 class GameRunning extends React.Component {
 
@@ -275,7 +279,7 @@ class GameRunning extends React.Component {
       return null;
     }
 
-    var angleDiff = this.angleDistance(this.state.currentOrientationAroundZAxis, calibration.angle)
+    var angleDiff = angleDistance(this.state.currentOrientationAroundZAxis, calibration.angle)
     if (angleDiff > 30) {
       console.log('angle diff too big', angleDiff)
       return null;
@@ -296,10 +300,7 @@ class GameRunning extends React.Component {
     this.props.onMissleFired(this.state.currentOrientationAroundZAxis, speed);
   }
 
-  angleDistance(a, b) {
-    var phi = Math.abs(b - a) % 360; // This is either the distance or 360 - distance
-    return phi > 180 ? 360 - phi : phi;
-  }
+  
 
   render() {
     return (
@@ -315,6 +316,7 @@ class GameRunning extends React.Component {
                   </div>
                 }
               </div>
+              <Target calibrations={this.props.player.calibration}/>
               <HighScore players={this.props.players} />
             </div>
           </div>
@@ -333,7 +335,7 @@ class App extends React.Component {
     super(props)
     this.state = {
       players: [],
-      username: ""
+      username: "",
     }
   }
 
@@ -391,8 +393,6 @@ class App extends React.Component {
       username,
       angle: calibrationsByUsername[username]
     }))
-    this.setState({calibrations: calibrationsArray})
-
     this.socket.emit('set calibration', calibrationsArray);
   }
 
@@ -419,7 +419,6 @@ class App extends React.Component {
       case "running":
         return <GameRunning
           username={this.state.username}
-          calibrations={this.state.calibrations}
           players={this.state.players || []}
           player={this.currentPlayer()}
           onMissleFired={this.handleMissleFired}
