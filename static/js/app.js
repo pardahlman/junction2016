@@ -81,12 +81,13 @@ class JoinGameForm extends React.Component {
 }
 
 const StartGameForm = ({
+  gameId,
   players = [],
   onStartGame
 }) =>
   <div style={{ padding: '1em' }}>
     <h1 style={{ textAlign: 'center' }}>
-      Current players
+      Current players: <span>{gameId}</span>
     </h1>
 
     <ul style={{
@@ -148,7 +149,7 @@ class PerformCalibration extends React.Component {
     return (
       <div style={{ padding: '1em' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <h1>Waiting for calibration</h1>
+          <h1>Waiting for calibration: <span>{this.props.gameId}</span></h1>
           <div>{parseInt(this.state.currentOrientationAroundZAxis) || 0}°</div>
         </div>
 
@@ -427,10 +428,11 @@ class App extends React.Component {
   render() {
     switch (this.state.state) {
       case "waiting_for_players":
-        return <StartGameForm players={this.state.players} onStartGame={this.handleStartGame} />
+        return <StartGameForm gameId={this.state.id} players={this.state.players} onStartGame={this.handleStartGame} />
       case "waiting_for_calibration":
         return (
           <PerformCalibration
+            gameId={this.state.id}
             players={this.state.players}
             username={this.state.username}
             onSendCalibration={this.handleSendCalibration}
