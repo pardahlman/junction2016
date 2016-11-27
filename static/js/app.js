@@ -139,7 +139,12 @@ class PerformCalibration extends React.Component {
               this.state.calibrationsByUsername[p.username] ||
               this.props.username === p.username
             )}
-            style={{ marginBottom: '1rem' }}
+            style={{
+              marginBottom: '1rem',
+              fontSize: '0.8em'.
+              padding: '1em 1.2em',
+              textAlign: 'left'
+            }}
           >
             Point at "{p.username}" and press me!
           </button>
@@ -160,17 +165,17 @@ const Missle = ({ distance, id, from, to, onClick}) =>
     height: '3em',
   }} src="/svg/missile.svg" onClick={() => onClick(id)} />
 
-class HighScore extends React.Component {
-  getSortedList(){
-    return this.props.players.sort((first, second) => second.score-first.score);
-  }
-
-  render(){
-    return (<ol>
-      {this.getSortedList().map(p => <li>{p.username}: {p.score}</li>)}
-    </ol>)
-  }
-}
+const HighScore = ({ players = [] }) =>
+  <ol>
+    {players
+      .sort((first, second) => second.score - first.score)
+      .map(({ username, score }) =>
+        <li key={username}>
+          {username}: {score}
+        </li>
+      )
+    }
+  </ol>
 
 class GameRunning extends React.Component {
 
@@ -221,14 +226,18 @@ class GameRunning extends React.Component {
   render() {
     return (
       <div style={{ width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'stretch' }}>
-        <h1 style={{ padding: '1rem', textAlign: 'center', color: '#fff' }}>
-          Running
-          <span> - {parseInt(this.state.currentOrientationAroundZAxis) || 0}°</span>
-        </h1>
-        <div style={{ flex: 1, background: '#eee', position: 'relative' }}>
-        <HighScore players={this.props.players} style={{float:'right'}} />
-          {this.props.missiles.map(m => this.renderMissile(m))}
+        <div style={{ display: 'flex', padding: '1rem', color: '#fff', justifyContent: 'space-between' }}>
+          <div>
+            {parseInt(this.state.currentOrientationAroundZAxis) || 0}°
+          </div>
+          <HighScore players={this.props.players} />
         </div>
+
+
+        <div style={{ flex: 1, background: '#eee', position: 'relative' }}>
+          {this.props.missiles.map(this.renderMissile)}
+        </div>
+
         <div style={{ width: '100%', textAlign: 'center', padding: '1em' }}>
           <button onClick={this.onMissileFired}>
             Fire!
