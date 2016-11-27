@@ -211,10 +211,6 @@ class GameRunning extends React.Component {
     window.removeEventListener('onorientationchange', this.handleResize)
   }
 
-  onMissileFired = speed => {
-    this.props.onMissleFired(this.state.currentOrientationAroundZAxis, speed);
-  }
-
   renderMissile = m => {
     if (m.to != this.props.username) return null;
     var calibration = _.find(this.props.player.calibration, function(c) { return c.username == m.from });
@@ -232,7 +228,7 @@ class GameRunning extends React.Component {
     return <Missle key={m.id} {...m} onClick={() => this.props.onMissileClicked(m.id)}/>;
   }
 
-  handlePan = evt => {
+  onMissileFired = evt => {
     if(evt.additionalEvent !== "panup"){
       return;
     }
@@ -241,8 +237,7 @@ class GameRunning extends React.Component {
     }
 
     var speed = -1 * evt.velocityY * 4;
-    this.onMissileFired(speed);
-    evt.distance
+    this.props.onMissleFired(this.state.currentOrientationAroundZAxis, speed);
   }
 
   angleDistance(a, b) {
@@ -252,7 +247,7 @@ class GameRunning extends React.Component {
 
   render() {
     return (
-      <HammerComponent onPan={this.handlePan}>
+      <HammerComponent onPan={this.onMissileFired}>
         <div style={{ width: '100vw', height: this.state.height || '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'stretch' }}>
           <div style={{ display: 'flex', padding: '1rem', color: '#fff', justifyContent: 'space-between' }}>
             <div>
@@ -260,8 +255,6 @@ class GameRunning extends React.Component {
             </div>
             <HighScore players={this.props.players} />
           </div>
-
-
           <div style={{ flex: 1, background: 'black', position: 'relative' }}>
             {this.props.missiles.map(this.renderMissile)}
           </div>
