@@ -166,7 +166,7 @@ const Missle = ({ distance, id, from, to, onClick}) =>
   }} src="/svg/missile.svg" onClick={() => onClick(id)} />
 
 const HighScore = ({ players = [] }) =>
-  <ol>
+  <ol style={{ margin: 0 }}>
     {players
       .sort((first, second) => second.score - first.score)
       .map(({ username, score }) =>
