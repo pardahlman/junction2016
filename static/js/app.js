@@ -140,6 +140,7 @@ class PerformCalibration extends React.Component {
 
         {this.props.players.map(p =>
           <button
+            key={p.username}
             onClick={() => this.handleCalibrate(p.username)}
             disabled={(
               this.state.calibrationsByUsername[p.username] ||
