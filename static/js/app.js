@@ -187,6 +187,35 @@ const HighScore = ({ players = [] }) =>
     }
   </ol>
 
+class Target extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      calibrations: [],
+      angle: 0
+    }
+  }
+
+  componentDidMount() {
+    window.addEventListener('deviceorientation', this.handleOrientationChange);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('deviceorientation', this.handleOrientationChange);
+  }
+
+  handleOrientationChange = e => {
+    this.setState({angle: e.alpha});
+  }
+
+  render(){
+    var target = this.state.calibrations.filter(c => angleDistance(c.angle, this.state.angle) <= 5)[0];
+    if(!target)
+      target = {username: 'Unknown'}
+    return <h1>{target.username}</h1>;
+  }
+}
+
 class GameRunning extends React.Component {
 
   constructor(props) {
@@ -270,6 +299,7 @@ class GameRunning extends React.Component {
           <div style={{ width: '100%', textAlign: 'center', padding: '1em' }}>
           </div>
         </div>
+        <Target calibrations={this.state.calibrations}/>
       </HammerComponent>
     );
   }
@@ -338,6 +368,7 @@ class App extends React.Component {
       username,
       angle: calibrationsByUsername[username]
     }))
+    this.setState({calibrations: calibrationsArray})
 
     this.socket.emit('set calibration', calibrationsArray);
   }
@@ -365,6 +396,7 @@ class App extends React.Component {
       case "running":
         return <GameRunning
           username={this.state.username}
+          calibrations={this.state.calibrations}
           players={this.state.players || []}
           player={this.currentPlayer()}
           onMissleFired={this.handleMissleFired}
