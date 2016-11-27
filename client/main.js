@@ -382,7 +382,10 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    this.socket = socketIO(getQueryVariable('socket_url') || 'localhost:5000')
+    this.socket = socketIO(
+      getQueryVariable('socket_url') ||
+      process.env.NODE_ENV === 'production' ? '' : 'localhost:5000'
+    )
 
     this.socket.on('client error', data => {
       console.warn('client error', data)
