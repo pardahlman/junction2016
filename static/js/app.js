@@ -330,14 +330,13 @@ class GameRunning extends React.Component {
           <div>
             <div style={{ display: 'flex', padding: '1rem', color: '#fff', justifyContent: 'space-between' }}>
               <div>
-                <div>{parseInt(this.state.currentOrientationAroundZAxis) || 0}°</div>
+                <Target calibrations={this.props.player.calibration}/>
                 {this.state.mostRecentEvent &&
                   <div style={{ color: '#ff296b' }}>
                     {eventMessageByName[this.state.mostRecentEvent]}
                   </div>
                 }
               </div>
-              <Target calibrations={this.props.player.calibration}/>
               <HighScore players={this.props.players} />
             </div>
           </div>
