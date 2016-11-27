@@ -193,7 +193,7 @@ const Missle = ({ id, distance, rotation, angleDiff, ...props }) =>
       transform: 'rotate('+ rotation +'deg)',
       opacity: (1 - angleDiff / MISILE_ANGLE_DIFF_VISIBLE) + '',
       top: distance + '%',
-      left: (10 + ((2 * id) % 80)) + '%',
+      left: (10 + ((5 * id) % 80)) + '%',
       width: '3em',
       height: '3em',
     }}
